@@ -10,24 +10,26 @@
 
     <div class="min-h-screen flex">
 
-        {{-- Sidebar --}}
+        {{-- Sidebar Principal --}}
         <aside class="w-64 bg-blue-700 text-white flex flex-col">
             <div class="p-6 text-2xl font-bold border-b border-blue-600">
                 MonColis
             </div>
             <nav class="flex-1 p-4 space-y-2">
-                <a href="#" class="block px-4 py-2 rounded-lg bg-blue-800">Dashboard</a>
-                <a href="#" class="block px-4 py-2 rounded-lg hover:bg-blue-600">Colis</a>
-                <a href="#" class="block px-4 py-2 rounded-lg hover:bg-blue-600">Livreurs</a>
-                <a href="#" class="block px-4 py-2 rounded-lg hover:bg-blue-600">E-commerçants</a>
-                <a href="#" class="block px-4 py-2 rounded-lg hover:bg-blue-600">Affectations</a>
-                <a href="#" class="block px-4 py-2 rounded-lg hover:bg-blue-600">Finances</a>
-                <a href="#" class="block px-4 py-2 rounded-lg hover:bg-blue-600">Audit Log</a>
+                {{-- Hna rddna ga3 l-liens khddamin nîchan --}}
+                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 rounded-lg bg-blue-800">Dashboard</a>
+                <a href="{{ route('admin.colis.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Colis</a>
+                <a href="{{ route('admin.users.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Utilisateurs</a>
+                <a href="{{ route('admin.livreurs.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Livreurs</a>
+                <a href="{{ route('admin.ecomercants.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">E-commerçants</a>
+                <a href="{{ route('admin.affectations.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Affectations</a>
+                <a href="{{ route('admin.finances.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Finances</a>
+                <a href="{{ route('admin.audit.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Audit Log</a>
             </nav>
             <div class="p-4 border-t border-blue-600">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <button class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-600 cursor-pointer">
                         Déconnexion
                     </button>
                 </form>

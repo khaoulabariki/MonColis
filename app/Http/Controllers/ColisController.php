@@ -11,11 +11,24 @@ use Illuminate\Support\Facades\Auth;
 class ColisController extends Controller
 {
     // Liste des colis (Admin)
-    public function index()
-    {
-        $colis = Colis::with('ecomercant')->latest()->paginate(15);
-        return view('admin.colis.index', compact('colis'));
+    public function index(Request $request)
+{
+    $query = Colis::with('ecomercant')->latest();
+
+    // Filtre par statut
+    if ($request->filled('statut')) {
+        $query->where('statut', $request->statut);
     }
+
+    // Filtre par recherche
+    if ($request->filled('search')) {
+        $query->where('code_suivi', 'like', '%' . $request->search . '%');
+    }
+
+    $colis = $query->paginate(15)->withQueryString();
+
+    return view('admin.colis.index', compact('colis'));
+}
 
     // Liste des colis (E-commerçant)
     public function mesColis()
