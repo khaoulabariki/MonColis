@@ -16,8 +16,8 @@
             <a href="{{ route('ecomercant.dashboard') }}" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Dashboard</a>
             <a href="{{ route('ecomercant.colis.index') }}" class="block px-4 py-2 rounded-lg bg-indigo-800">Mes Colis</a>
             <a href="{{ route('ecomercant.colis.create') }}" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Nouveau Colis</a>
-            <a href="#" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Mon Wallet</a>
-            <a href="#" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Retraits</a>
+           <a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"> Mon Wallet</a>
+           <a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"> Retraits</a>
         </nav>
         <div class="p-4 border-t border-indigo-600">
             <form method="POST" action="{{ route('logout') }}">

@@ -6,7 +6,7 @@
                 Dashboard
             </a>
             
-            {{-- Colis (Db ghadi t-forca n9iya) --}}
+            {{-- Colis --}}
             <a href="{{ route('admin.colis.index') }}" 
                onclick="window.location.href='{{ route('admin.colis.index') }}'; return true;"
                class="block px-4 py-2.5 rounded-lg font-medium transition duration-150 {{ request()->routeIs('admin.colis.*') ? 'bg-blue-900 text-white' : 'text-blue-100 hover:bg-blue-600 hover:text-white' }}">

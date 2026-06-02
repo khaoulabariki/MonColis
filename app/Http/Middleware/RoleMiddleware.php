@@ -10,6 +10,12 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, string $role)
     {
+        
+        if ($request->is('tracking') || $request->is('suivi-colis') || $request->is('/')) {
+            return $next($request);
+        }
+
+        
         if (!Auth::check()) {
             return redirect()->route('login');
         }
