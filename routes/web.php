@@ -337,7 +337,8 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:livreur'])->prefix('livreur')->name('livreur.')->group(function () {
-    
+    //mes livraisons
+    Route::put('/colis/{id}/statut', [\App\Http\Controllers\ColisController::class, 'updateStatut'])->name('colis.statut');
     // Tableau de bord du livreur avec compte des colis assignés
     Route::get('/dashboard', function () {
         $colisCount = Affectation::where('livreur_id', auth()->id())

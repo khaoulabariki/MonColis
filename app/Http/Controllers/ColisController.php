@@ -78,4 +78,26 @@ class ColisController extends Controller
 
         return redirect()->back()->with('success', 'Livreur assigné avec succès !');
     }
+
+    /**
+     * Mettre à jour le statut d'un colis (utilisé par le livreur).
+     */
+    public function updateStatut(Request $request, $id)
+    {
+        // Validation du statut envoyé
+        $request->validate([
+            'statut' => 'required|string',
+        ]);
+
+        // Trouver le colis par son ID
+        $colis = \App\Models\Colis::findOrFail($id);
+
+        // Mettre à jour le statut dans la base de données
+        $colis->update([
+            'statut' => $request->statut,
+        ]);
+
+        // Retourner à la page précédente avec un message de succès
+        return redirect()->back()->with('success', 'Le statut du colis a été mis à jour avec succès !');
+    }
 }
