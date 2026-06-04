@@ -15,16 +15,15 @@ class Affectation extends Model
         'statut',
     ];
 
-    protected $casts = [
-        'date_affectation' => 'date',
-    ];
+    // --- RELATIONS ---
 
-    // Relations
+    // L'affectation concerne un colis spécifique
     public function colis()
     {
         return $this->belongsTo(Colis::class, 'colis_id');
     }
 
+    // L'affectation est attribuée à un livreur spécifique
     public function livreur()
     {
         return $this->belongsTo(Utilisateur::class, 'livreur_id');

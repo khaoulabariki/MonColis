@@ -1,5 +1,6 @@
 <?php
-namespace App\Models ;
+
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,12 +16,15 @@ class AuditLog extends Model
         'donnees_apres',
     ];
 
+    // Cast des colonnes JSON en tableaux PHP automatiquement
     protected $casts = [
         'donnees_avant' => 'array',
         'donnees_apres' => 'array',
     ];
 
-    // Relations
+    // --- RELATIONS ---
+
+    // Le log d'audit a été généré par un utilisateur spécifique
     public function utilisateur()
     {
         return $this->belongsTo(Utilisateur::class, 'utilisateur_id');

@@ -22,7 +22,8 @@
     </div>
     <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-l-4 border-l-rose-500">
         <span class="text-xs text-rose-500 font-bold uppercase tracking-wider">Retournés</span>
-        <h3 class="text-3xl font-black text-rose-600 mt-1">{{ $retourne ?? 0 }}</h3>
+        
+        <h3 class="text-3xl font-black text-rose-600 mt-1">{{ $retournes ?? 0 }}</h3>
     </div>
 </div>
 
@@ -58,7 +59,8 @@
                 labels: ['Livrés', 'En cours', 'Retournés'],
                 datasets: [{
                     label: 'Nombre de Colis',
-                    data: [{{ $livres ?? 0 }}, {{ $enCours ?? 0 }}, {{ $retourne ?? 0 }}],
+                    
+                    data: [{{ $livres ?? 0 }}, {{ $enCours ?? 0 }}, {{ $retournes ?? 0 }}],
                     backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
                     borderRadius: 8,
                     barThickness: 25
@@ -75,14 +77,15 @@
             }
         });
 
-        //  Doughnut Chart
+        // 🍩 2. Doughnut Chart
         const ctxPie = document.getElementById('colisPieChart').getContext('2d');
         new Chart(ctxPie, {
             type: 'doughnut',
             data: {
                 labels: ['Livrés', 'En cours', 'Retournés'],
                 datasets: [{
-                    data: [{{ $livres ?? 0 }}, {{ $enCours ?? 0 }}, {{ $retourne ?? 0 }}],
+                    
+                    data: [{{ $livres ?? 0 }}, {{ $enCours ?? 0 }}, {{ $retournes ?? 0 }}],
                     backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
                     borderWidth: 2,
                     borderColor: '#ffffff'

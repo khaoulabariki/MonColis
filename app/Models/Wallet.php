@@ -9,49 +9,21 @@ class Wallet extends Model
     protected $table = 'wallets';
 
     protected $fillable = [
-        'ecomercant_id',
+        'ecommercant_id',
         'solde',
     ];
 
-    protected $casts = [
-        'solde' => 'decimal:2',
-    ];
+    // --- RELATIONS ---
 
-    // Relations
-    public function ecomercant()
+    // Le wallet appartient à un e-commerçant spécifique
+    public function ecommercant()
     {
-        return $this->belongsTo(Utilisateur::class, 'ecomercant_id');
+        return $this->belongsTo(Utilisateur::class, 'ecommercant_id');
     }
 
+    // Un wallet peut avoir plusieurs transactions (historique financier)
     public function transactions()
     {
         return $this->hasMany(Transaction::class, 'wallet_id');
-    }
-
-    // Helpers
-    public function debiter($montant)
-    {
-        $this->solde -= $montant;
-        $this->save();
-
-        Transaction::create([
-            'wallet_id'   => $this->id,
-            'type'        => 'debit',
-            'montant'     => $montant,
-            'description' => 'Frais de livraison',
-        ]);
-    }
-
-    public function crediter($montant)
-    {
-        $this->solde += $montant;
-        $this->save();
-
-        Transaction::create([
-            'wallet_id'   => $this->id,
-            'type'        => 'credit',
-            'montant'     => $montant,
-            'description' => 'Paiement livraison',
-        ]);
     }
 }

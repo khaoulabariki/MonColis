@@ -3,114 +3,62 @@
 namespace App\Http\Controllers;
 
 use App\Models\Colis;
-use App\Models\Utilisateur;
-use App\Models\AuditLog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ColisController extends Controller
 {
-    // Liste des colis (Admin)
-    public function index(Request $request)
-{
-    $query = Colis::with('ecomercant')->latest();
-
-    // Filtre par statut
-    if ($request->filled('statut')) {
-        $query->where('statut', $request->statut);
-    }
-
-    // Filtre par recherche
-    if ($request->filled('search')) {
-        $query->where('code_suivi', 'like', '%' . $request->search . '%');
-    }
-
-    $colis = $query->paginate(15)->withQueryString();
-
-    return view('admin.colis.index', compact('colis'));
-}
-
-    // Liste des colis (E-commerçant)
-    public function mesColis()
+    // Afficher tous les colis (Pour l'admin)
+    public function index()
     {
-        $colis = Colis::where('ecomercant_id', Auth::id())
-                      ->latest()
-                      ->paginate(15);
-        return view('ecomercant.colis.index', compact('colis'));
+        return response()->json(Colis::with(['ecommercant', 'livreur'])->get());
     }
 
-    // Formulaire créer colis
-    public function create()
-    {
-        return view('ecomercant.colis.create');
-    }
-
-    // Enregistrer colis
+    // Créer un nouveau colis (Par l'E-commerçant)
     public function store(Request $request)
     {
         $request->validate([
-            'nom_destinataire'      => 'required|string',
-            'prenom_destinataire'   => 'required|string',
-            'telephone_destinataire'=> 'required|string',
-            'adresse_destinataire'  => 'required|string',
-            'poids'                 => 'required|numeric|min:0',
-            'prix'                  => 'required|numeric|min:0',
+            'nom_destinataire' => 'required|string',
+            'prenom_destinataire' => 'required|string',
+            'telephone_destinataire' => 'required|string',
+            'adresse_destinataire' => 'required|string',
+            'poids' => 'required|numeric',
+            'prix' => 'required|numeric',
+            'ecommercant_id' => 'required|exists:utilisateurs,id',
         ]);
 
-        $colis = Colis::create([
-            'nom_destinataire'       => $request->nom_destinataire,
-            'prenom_destinataire'    => $request->prenom_destinataire,
-            'telephone_destinataire' => $request->telephone_destinataire,
-            'adresse_destinataire'   => $request->adresse_destinataire,
-            'poids'                  => $request->poids,
-            'prix'                   => $request->prix,
-            'ecomercant_id'          => Auth::id(),
-        ]);
+        // Génération automatique du code de suivi et token unique
+        $codeSuivi = 'NWS-' . strtoupper(Str::random(8));
+        $tokenSuivi = Str::uuid()->toString();
 
-        // Audit log
-        AuditLog::create([
-            'utilisateur_id' => Auth::id(),
-            'action'         => 'création',
-            'entite'         => 'Colis',
-            'donnees_avant'  => null,
-            'donnees_apres'  => $colis->toArray(),
-        ]);
+        $colis = Colis::create(array_merge(
+            $request->all(),
+            ['code_suivi' => $codeSuivi, 'token_suivi' => $tokenSuivi, 'statut' => 'enregistre']
+        ));
 
-        return redirect()->route('ecomercant.colis.index')
-                         ->with('success', 'Colis enregistré avec succès !');
+        return response()->json(['message' => 'Colis enregistré avec succès', 'colis' => $colis], 201);
     }
 
-    // Détail colis
-    public function show(Colis $colis)
-    {
-        return view('ecomercant.colis.show', compact('colis'));
-    }
-
-    // Page tracking public
-    public function tracking($token)
-    {
-        $colis = Colis::where('token_suivi', $token)->firstOrFail();
-        return view('public.tracking', compact('colis'));
-    }
-
-    // Changer statut (Livreur)
-    public function changerStatut(Request $request, Colis $colis)
+    // Assigner un livreur au colis et créer une affectation
+    public function assignLivreur(Request $request, $id)
     {
         $request->validate([
-            'statut' => 'required|in:en_cours,livre,retourne',
+            'livreur_id' => 'required|exists:utilisateurs,id'
         ]);
 
-        $avant = $colis->toArray();
-        $colis->update(['statut' => $request->statut]);
-
-        AuditLog::create([
-            'utilisateur_id' => Auth::id(),
-            'action'         => 'changement statut',
-            'entite'         => 'Colis',
-            'donnees_avant'  => $avant,
-            'donnees_apres'  => $colis->fresh()->toArray(),
+        $colis = Colis::findOrFail($id);
+        $colis->update([
+            'livreur_id' => $request->livreur_id,
+            'statut' => 'en_cours'
         ]);
 
-        return back()->with('success', 'Statut mis à jour !');
+        // Enregistrer l'action dans l'historique des affectations
+        $colis->affectations()->create([
+            'livreur_id' => $request->livreur_id,
+            'date_affectation' => now(),
+            'statut' => 'en_cours'
+        ]);
+
+        return response()->json(['message' => 'Livreur assigné et colis mis en cours', 'colis' => $colis]);
     }
 }

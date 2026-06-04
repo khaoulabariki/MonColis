@@ -14,7 +14,7 @@
         <div class="p-6 text-2xl font-bold border-b border-orange-500">MonColis</div>
         <nav class="flex-1 p-4 space-y-2">
             <a href="{{ route('livreur.dashboard') }}" class="block px-4 py-2 rounded-lg hover:bg-orange-500">Dashboard</a>
-            <a href="{{ route('livreur.affectations.index') }}" class="block px-4 py-2 rounded-lg bg-orange-700">Mes Livraisons</a>
+            <a href="{{ route('livreur.mes_livraisons') }}" class="block px-4 py-2 rounded-lg bg-orange-700">Mes Livraisons</a>
         </nav>
         <div class="p-4 border-t border-orange-500">
             <p class="text-sm text-orange-200 mb-2">

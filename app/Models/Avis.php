@@ -15,7 +15,9 @@ class Avis extends Model
         'sentiment',
     ];
 
-    // Relations
+    // --- RELATIONS ---
+
+    // L'avis concerne un colis spécifique
     public function colis()
     {
         return $this->belongsTo(Colis::class, 'colis_id');

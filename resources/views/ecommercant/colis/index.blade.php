@@ -78,7 +78,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{{ route('tracking', $c->token_suivi) }}"
+                            <a href="{{ route('tracking.public', $c->token_suivi) }}"
                                 class="text-indigo-600 hover:underline text-xs">
                                 Suivi
                             </a>

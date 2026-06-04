@@ -9,18 +9,16 @@ class Retrait extends Model
     protected $table = 'retraits';
 
     protected $fillable = [
-        'ecomercant_id',
+        'ecommercant_id',
         'montant',
         'statut',
     ];
 
-    protected $casts = [
-        'montant' => 'decimal:2',
-    ];
+    // --- RELATIONS ---
 
-    // Relations
-    public function ecomercant()
+    // La demande de retrait appartient à un e-commerçant
+    public function ecommercant()
     {
-        return $this->belongsTo(Utilisateur::class, 'ecomercant_id');
+        return $this->belongsTo(Utilisateur::class, 'ecommercant_id');
     }
 }

@@ -15,11 +15,9 @@ class Transaction extends Model
         'description',
     ];
 
-    protected $casts = [
-        'montant' => 'decimal:2',
-    ];
+    // --- RELATIONS ---
 
-    // Relations
+    // La transaction est liée à un wallet spécifique
     public function wallet()
     {
         return $this->belongsTo(Wallet::class, 'wallet_id');

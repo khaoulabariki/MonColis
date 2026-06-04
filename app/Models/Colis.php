@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class Colis extends Model
 {
@@ -19,39 +18,33 @@ class Colis extends Model
         'prix',
         'statut',
         'token_suivi',
-        'ecomercant_id',
+        'ecommercant_id',
+        'livreur_id',
     ];
 
-    // Générer automatiquement code_suivi et token_suivi
-    protected static function boot()
-    {
-        parent::boot();
+    // --- RELATIONS ---
 
-        static::creating(function ($colis) {
-            $colis->code_suivi = 'MC-' . strtoupper(Str::random(8));
-            $colis->token_suivi = Str::uuid();
-        });
+    // Le colis appartient à un e-commerçant
+    public function ecommercant()
+    {
+        return $this->belongsTo(Utilisateur::class, 'ecommercant_id');
     }
 
-    // Relations
-    public function ecomercant()
+    // Le colis peut être assigné à un livreur (optionnel)
+    public function livreur()
     {
-        return $this->belongsTo(Utilisateur::class, 'ecomercant_id');
+        return $this->belongsTo(Utilisateur::class, 'livreur_id');
     }
 
+    // Un colis peut avoir plusieurs affectations (historique de ses livreurs)
     public function affectations()
     {
         return $this->hasMany(Affectation::class, 'colis_id');
     }
 
+    // Un colis peut avoir un ou plusieurs avis (selon ton MCD)
     public function avis()
     {
-        return $this->hasOne(Avis::class, 'colis_id');
-    }
-
-    // Livreur actuel
-    public function livreurActuel()
-    {
-        return $this->affectations()->latest()->first()?->livreur;
+        return $this->hasMany(Avis::class, 'colis_id');
     }
 }

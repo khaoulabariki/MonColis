@@ -19,7 +19,8 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-xs">
-                    @forelse($logs as $log)
+                    {{-- كيقرا المتغير المظبوط $auditLogs --}}
+                    @forelse($auditLogs ?? [] as $log)
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="p-4 font-medium text-slate-500">
                                 {{ \Carbon\Carbon::parse($log->created_at)->format('d/m/Y H:i:s') }}

@@ -1,33 +1,66 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MonColis — Finances</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-50">
-    <div class="min-h-screen flex">
-        <aside class="w-64 bg-blue-700 text-white flex flex-col">
-            <div class="p-6 text-2xl font-bold border-b border-blue-600">MonColis</div>
-            <nav class="flex-1 p-4 space-y-2">
-                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Dashboard</a>
-                <a href="{{ route('admin.colis.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Colis</a>
-                <a href="{{ route('admin.users.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Utilisateurs</a>
-                <a href="{{ route('admin.livreurs.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Livreurs</a>
-                <a href="{{ route('admin.ecomercants.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">E-commerçants</a>
-                <a href="{{ route('admin.affectations.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Affectations</a>
-                <a href="{{ route('admin.finances.index') }}" class="block px-4 py-2 rounded-lg bg-blue-800">Finances</a>
-                <a href="{{ route('admin.audit.index') }}" class="block px-4 py-2 rounded-lg hover:bg-blue-600 transition">Audit Log</a>
-            </nav>
-        </aside>
+@extends('layouts.app')
 
-        <main class="flex-1 p-8">
-            <h1 class="text-2xl font-bold text-gray-800 mb-6">Gestion des Finances</h1>
-            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <p class="text-gray-500 text-center py-4">Suivi financier en cours de développement...</p>
-            </div>
-        </main>
+@section('content')
+<div class="container-fluid my-6">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-slate-800"><i class="fas fa-wallet text-indigo-500 mr-2"></i>Suivi des Finances</h2>
+        <p class="text-sm text-slate-500">Visualisez le chiffre d'affaires, les gains de la plateforme et les montants e-commerçants.</p>
     </div>
-</body>
-</html>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Collecté (Cash)</span>
+                <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="fas fa-money-bill-wave"></i></div>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800">{{ $totalCollecte ?? 0 }} DH</h3>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Gains Plateforme</span>
+                <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fas fa-chart-line"></i></div>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800">{{ $fraisLivraisonTotal ?? 0 }} DH</h3>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Solde E-commerçants</span>
+                <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center"><i class="fas fa-hand-holding-usd"></i></div>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800">{{ $soldeEcommerçants ?? 0 }} DH</h3>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="p-6 border-b border-slate-100">
+            <h3 class="font-bold text-slate-800 text-lg">Détails des Colis Livrés (Simulés pour Test)</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm text-slate-600">
+                <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[11px]">
+                    <tr>
+                        <th class="p-4">Code Colis</th>
+                        <th class="p-4">Prix du Colis</th>
+                        <th class="p-4">Frais Livraison</th>
+                        <th class="p-4">Statut</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse($colisLivres ?? [] as $colis)
+                        <tr class="hover:bg-slate-50/80 transition">
+                            <td class="p-4 font-semibold text-indigo-600">#{{ $colis->id }}</td>
+                            <td class="p-4 font-medium text-slate-800">{{ $colis->prix }} DH</td>
+                            <td class="p-4 text-emerald-600 font-medium">40 DH</td>
+                            <td class="p-4"><span class="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-800">Livré</span></td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="p-8 text-center text-slate-400">Aucun colis marqué comme "Livré" pour le moment. (Modifiez le statut d'un colis dans la base pour tester).</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endsection

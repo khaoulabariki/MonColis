@@ -4,14 +4,20 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use App\Models\Utilisateur;
 use App\Models\Colis;
 use App\Models\Avis;
-use App\Http\Controllers\AffectationController;
+use App\Models\Affectation;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ColisController;
-use App\Http\Controllers\Admin\UserController;
-use Illuminate\Support\Facades\Auth; 
+use App\Http\Controllers\AffectationController;
+use App\Http\Controllers\AvisController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\WalletController;
+use App\Http\Controllers\RetraitController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\TransactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +25,7 @@ use Illuminate\Support\Facades\Auth;
 |--------------------------------------------------------------------------
 */
 
-// Redirection de l'URL racine vers la page de suivi / landing page
+// Redirection de l'URL racine vers la page de suivi public
 Route::get('/', function () {
     return redirect('/tracking');
 });
@@ -36,15 +42,14 @@ Route::get('/tracking', function (Request $request) {
     return view('welcome', compact('colis', 'code'));
 });
 
-// Routes publiques pour l'authentification des utilisateurs
+// Routes de gestion de l'authentification (Affichage, Connexion, Déconnexion)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Suivi public via token et dépôt d'avis/feedbacks
+// Suivi public via un jeton unique et dépôt d'avis clients
 Route::get('/suivi/{token}', [ColisController::class, 'tracking'])->name('tracking.public');
-Route::post('/suivi/{token}/avis', [App\Http\Controllers\AvisController::class, 'store'])->name('avis.store');
-
+Route::post('/suivi/{token}/avis', [AvisController::class, 'store'])->name('avis.store');
 
 /*
 |--------------------------------------------------------------------------
@@ -53,39 +58,36 @@ Route::post('/suivi/{token}/avis', [App\Http\Controllers\AvisController::class, 
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     
-    // 1. Gestion du Tableau de Bord avec Analyseur d'Avis IA intégré
+    // 1. Tableau de bord principal avec Analyseur d'Avis IA intégré
     Route::get('/dashboard', function() {
-        $totalColis = \App\Models\Colis::count() ?? 0;
-        $livres = \App\Models\Colis::where('statut', 'Livré')->count() ?? 0; 
-        $enCours = \App\Models\Colis::where('statut', 'En cours')->count() ?? 0;
-        $retournes = \App\Models\Colis::where('statut', 'Retourné')->count() ?? 0;
-        $annules = \App\Models\Colis::where('statut', 'Annulé')->count() ?? 0; 
+        $totalColis = Colis::count() ?? 0;
+        $livres = Colis::where('statut', 'Livré')->count() ?? 0; 
+        $enCours = Colis::where('statut', 'En cours')->count() ?? 0;
+        $retournes = Colis::where('statut', 'Retourné')->count() ?? 0;
+        $annules = Colis::where('statut', 'Annulé')->count() ?? 0; 
 
-        // Extraction de tous les commentaires de la base de données
         $allFeedbacks = Avis::pluck('commentaire')->toArray() ?? []; 
         $totalAvis = count($allFeedbacks);
         $positifs = 0;
         
-        // Scan automatique des avis par mots-clés positifs
         foreach ($allFeedbacks as $feedback) {
             if (preg_match('/(merci|excellent|top|bon|rapide|mzyan)/i', $feedback)) {
                 $positifs++;
             }
         }
 
-        // Calcul dynamique du taux de satisfaction de l'IA
         $tauxSatisfaction = $totalAvis > 0 ? round(($positifs / $totalAvis) * 100) : 100;
         
         if ($tauxSatisfaction >= 75) {
-            $iaResume = "La majorité des destinataires sont très satisfaits de la rapidité de livraison et du comportement des livreurs. Quelques remarques mineures sur les horaires.";
+            $iaResume = "La majorité des destinataires sont très satisfaits de la rapidité de livraison et du comportement des livreurs.";
             $iaStatus = "Excellent";
             $iaColor = "bg-green-500/10 text-green-400 border-green-500/20";
         } elseif ($tauxSatisfaction >= 50) {
-            $iaResume = "Attention, retour d'expérience mitigé. Les clients se plaignent de retards légers dans certaines zones.";
+            $iaResume = "Attention, retour d'expérience mitigé. Les clients se plaignent de retards légers.";
             $iaStatus = "Moyen";
             $iaColor = "bg-amber-500/10 text-amber-400 border-amber-500/20";
         } else {
-            $iaResume = "Alerte critique: Plusieurs feedbacks négatifs signalent des colis endommagés et un manque de communication.";
+            $iaResume = "Alerte critique: Plusieurs feedbacks négatifs signalent des colis endommagés.";
             $iaStatus = "Critique";
             $iaColor = "bg-red-500/10 text-red-400 border-red-500/20";
         }
@@ -96,176 +98,283 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ));
     })->name('dashboard');
 
-    // 2. Gestion des vues d'administration (Rendu direct des fichiers Blade)
+    // 2. Affichage de la liste globale des colis
     Route::get('/colis', function () {
-        $colisList = Colis::orderBy('created_at', 'desc')->get();
-        return view('admin.colis', compact('colisList'));
+        $colisList = Colis::with('livreur')->orderBy('created_at', 'desc')->get();
+        $ecommercants = collect([]); 
+        $mode = 'liste';
+        $colisEnCours = null;
+
+        return view('admin.colis.index', compact('colisList', 'ecommercants', 'mode', 'colisEnCours'));
     })->name('colis.index');
 
-    Route::get('/users', function () {
-        $utilisateurs = Utilisateur::orderBy('created_at', 'desc')->get();
-        return view('admin.users', compact('utilisateurs'));
-    })->name('users.index');
+    // 3. Formulaire de création d'un nouveau colis
+    Route::get('/colis/creer', function () {
+        $colisList = Colis::orderBy('created_at', 'desc')->get();
+        $ecommercants = Utilisateur::where('role', 'ecommercant')->get();
+        $mode = 'creation'; 
+        $colisEnCours = null;
 
-    Route::get('/livreurs', function () {
-        $livreurs = Utilisateur::where('role', 'livreur')->orderBy('created_at', 'desc')->get();
-        return view('admin.livreurs', compact('livreurs'));
+        return view('admin.colis.index', compact('colisList', 'ecommercants', 'mode', 'colisEnCours'));
+    })->name('colis.create');
+
+    // 4. Gestion des opérations financières (Traitée par TransactionController et RetraitController)
+    Route::get('/finances', [TransactionController::class, 'index'])->name('finances.index');
+    Route::post('/finances/retrait/{id}/valider', [RetraitController::class, 'traiterRetrait'])->name('finances.valider');
+
+    // 5. GESTION DES UTILISATEURS
+    
+    // --- SECTION : ADMINISTRATEURS ---
+    Route::get('/administrateurs', function() {
+        $adminsList = Utilisateur::where('role', 'admin')->get();
+        return view('admin.administrateurs.index', compact('adminsList'));
+    })->name('administrateurs.index');
+
+    Route::post('/administrateurs/store', function (Request $request) {
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'email' => 'required|email|unique:utilisateurs,email',
+            'password' => 'required|min:6',
+        ]);
+        Utilisateur::create([
+            'nom' => $request->nom,
+            'prenom' => $request->prenom,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'role' => 'admin',
+            'statut' => true
+        ]);
+        return redirect()->route('admin.administrateurs.index')->with('success', 'Administrateur ajouté avec succès !');
+    })->name('administrateurs.store');
+
+    Route::delete('/administrateurs/{id}/supprimer', function ($id) {
+        Utilisateur::where('id', $id)->delete();
+        return redirect()->route('admin.administrateurs.index')->with('success', 'Administrateur supprimé avec succès !');
+    })->name('administrateurs.destroy');
+
+
+    // --- SECTION : LIVREURS ---
+    Route::get('/livreurs', function() {
+        $livreursList = Utilisateur::where('role', 'livreur')->get();
+        return view('admin.livreurs.index', compact('livreursList'));
     })->name('livreurs.index');
 
-    Route::get('/ecommercants', function () {
-        $ecommercants = Utilisateur::where('role', 'ecomercant')->orderBy('created_at', 'desc')->get();
-        return view('admin.ecommercants', compact('ecommercants'));
+    Route::post('/livreurs/store', function (Request $request) {
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'email' => 'required|email|unique:utilisateurs,email',
+            'password' => 'required|min:6',
+        ]);
+
+        Utilisateur::create([
+            'nom' => $request->nom,
+            'prenom' => $request->prenom,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'role' => 'livreur',
+            'telephone' => $request->telephone ?? null,
+            'statut' => true
+        ]);
+        return redirect()->route('admin.livreurs.index')->with('success', 'Livreur ajouté avec succès !');
+    })->name('livreurs.store');
+
+    Route::delete('/livreurs/{id}/supprimer', function ($id) {
+        Utilisateur::where('id', $id)->delete();
+        return redirect()->route('admin.livreurs.index')->with('success', 'Livreur supprimé avec succès !');
+    })->name('livreurs.destroy');
+
+
+    // --- SECTION : E-COMMERÇANTS ---
+    Route::get('/ecommercants', function() {
+        $ecommercantsList = Utilisateur::where('role', 'ecommercant')->get();
+        return view('admin.ecommercants.index', compact('ecommercantsList'));
     })->name('ecommercants.index');
 
-    Route::get('/affectations', function () {
-        $colis = Colis::whereIn('statut', ['enregistre', 'ramasse'])->orderBy('created_at', 'desc')->get();
-        $livreurs = Utilisateur::where('role', 'livreur')->get();
-        return view('admin.affectations', compact('colis', 'livreurs'));
-    })->name('affectations.index');
-
-    // 3. Opérations financières globales de l'administrateur
-    Route::get('/finances', function () {
-        // Récupération des portefeuilles des e-commerçants et des livreurs
-        $wallets = DB::table('wallets')
-                     ->join('utilisateurs', 'wallets.ecomercant_id', '=', 'utilisateurs.id')
-                     ->where('utilisateurs.role', 'ecomercant')
-                     ->select('wallets.*', 'utilisateurs.nom', 'utilisateurs.prenom', 'utilisateurs.email')
-                     ->orderBy('wallets.solde', 'desc')
-                     ->get();
-
-        $wallets_livreurs = DB::table('wallets')
-                              ->join('utilisateurs', 'wallets.ecomercant_id', '=', 'utilisateurs.id')
-                              ->where('utilisateurs.role', 'livreur')
-                              ->select('wallets.*', 'utilisateurs.nom', 'utilisateurs.prenom', 'utilisateurs.email')
-                              ->orderBy('wallets.solde', 'desc')
-                              ->get();
-
-        $retraits = DB::table('retraits')
-                      ->join('utilisateurs', 'retraits.ecomercant_id', '=', 'utilisateurs.id')
-                      ->select('retraits.*', 'utilisateurs.nom', 'utilisateurs.prenom')
-                      ->orderBy('retraits.created_at', 'desc')
-                      ->get();
-
-        return view('admin.finances', compact('wallets', 'wallets_livreurs', 'retraits'));
-    })->name('finances.index');
-
-    // Actions financières (Validation de retrait et Règlement de compte)
-    Route::post('/finances/retrait/{id}/valider', function ($id) {
-        $retrait = DB::table('retraits')->where('id', $id)->first();
-        if ($retrait && $retrait->statut == 'en_attente') {
-            $wallet = DB::table('wallets')->where('ecomercant_id', $retrait->ecomercant_id)->first();
-            if ($wallet && $wallet->solde >= $retrait->montant) {
-                DB::table('wallets')->where('ecomercant_id', $retrait->ecomercant_id)->decrement('solde', $retrait->montant);
-                DB::table('retraits')->where('id', $id)->update(['statut' => 'valide', 'updated_at' => now()]);
-                return redirect()->back()->with('success', 'Retrait validé avec succès !');
-            }
-            return redirect()->back()->with('error', 'Solde insuffisant.');
-        }
-        return redirect()->back()->with('error', 'Erreur survenue.');
-    })->name('finances.valider');
-
-    Route::post('/finances/livreur/{id}/regler', function ($id) {
-        DB::table('wallets')->where('id', $id)->update(['solde' => 0, 'updated_at' => now()]);
-        return redirect()->back()->with('success', 'Le compte du livreur a été réglé ! 💰');
-    })->name('finances.regler');
-
-    // 4. Gestion des affectations de colis aux livreurs
-    Route::post('/affectations/store', function (Request $request) {
+    Route::post('/ecommercants/store', function (Request $request) {
         $request->validate([
-            'colis_id' => 'required|exists:colis,id',
-            'livreur_id' => 'required|exists:utilisateurs,id',
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'email' => 'required|email|unique:utilisateurs,email',
+            'password' => 'required|min:6',
         ]);
 
-        DB::table('affectations')->insert([
-            'colis_id' => $request->colis_id,
-            'utilisateur_id' => $request->livreur_id, 
-            'created_at' => now(),
-            'updated_at' => now(),
+        Utilisateur::create([
+            'nom' => $request->nom,
+            'prenom' => $request->prenom,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'role' => 'ecommercant',
+            'telephone' => $request->telephone ?? null,
+            'statut' => true
         ]);
+        return redirect()->route('admin.ecommercants.index')->with('success', 'E-commerçant ajouté avec succès !');
+    })->name('ecommercants.store');
 
-        Colis::where('id', $request->colis_id)->update(['statut' => 'en_cours']);
-        return redirect()->back()->with('success', 'Le colis a été affecté au livreur avec succès!');
-    })->name('affectations.store');
+    Route::delete('/ecommercants/{id}/supprimer', function ($id) {
+        Utilisateur::where('id', $id)->delete();
+        return redirect()->route('admin.ecommercants.index')->with('success', 'E-commerçant supprimé avec succès !');
+    })->name('ecommercants.destroy');
 
-    Route::get('/colis/{colis}/affecter', [AffectationController::class, 'create'])->name('colis.affecter');
-    Route::post('/colis/{colis}/affecter', [AffectationController::class, 'store'])->name('colis.store.affecter');
+    
+    // 6. Gestion et suivi des affectations de colis aux livreurs
+    Route::get('/affectations', [AffectationController::class, 'index'])->name('affectations.index');
+    
+    // Traitement et liaison de l'action de soumission d'une affectation
+    Route::post('/affectations/{id}', [AffectationController::class, 'store'])->name('affectations.store');
 
-    // 5. Gestion avancée des utilisateurs via les contrôleurs dédiés
-    Route::get('/utilisateurs', [UserController::class, 'index'])->name('users.index_controller');
-    Route::get('/utilisateurs/creer', [UserController::class, 'create'])->name('users.create');
-    Route::post('/utilisateurs/store', [UserController::class, 'store'])->name('users.store');
-    Route::post('/utilisateurs/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
-    Route::get('/livreurs-list', [UserController::class, 'livreursInline'])->name('livreurs.inline');
-    Route::get('/e-commercants-list', [UserController::class, 'ecomercantsInline'])->name('ecomercants.inline');
-
-    // 6. Système de journalisation et d'audit de sécurité
-    Route::get('/audit', function () {
-        $logs = Schema::hasTable('audit_logs') ? DB::table('audit_logs')->orderBy('created_at', 'desc')->get() : collect([]);
-        return view('admin.logs', compact('logs'));
-    })->name('audit.index');
+    // 7. Journaux et logs d'audit du système informatique
+    Route::get('/audit', [\App\Http\Controllers\AuditLogController::class, 'index'])->name('audit.index');
 });
-
 
 /*
 |--------------------------------------------------------------------------
-| Espace E-commerçant (Protégé par Auth et le rôle Ecomercant)
+| Routes Autonomes de Gestion des Colis (Espace Admin)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:ecomercant'])->prefix('ecomercant')->name('ecomercant.')->group(function () {
-    
-    // Statistiques du Tableau de Bord de l'e-commerçant
-    Route::get('/dashboard', function () {
-        $ecomercant_id = Auth::id() ?? 2; 
-        $totalColis = DB::table('colis')->where('ecomercant_id', $ecomercant_id)->count();
-        $livres     = DB::table('colis')->where('ecomercant_id', $ecomercant_id)->where('statut', 'livre')->count();
-        $enCours    = DB::table('colis')->where('ecomercant_id', $ecomercant_id)->where('statut', 'en_cours')->count();
-        $retourne   = DB::table('colis')->where('ecomercant_id', $ecomercant_id)->where('statut', 'retourne')->count();
-        return view('ecomercant.dashboard', compact('totalColis', 'livres', 'enCours', 'retourne'));
-    })->name('dashboard');
 
-    // Suivi du portefeuille financier et historique des retraits
-    Route::get('/finances', function () {
-        $ecomercant_id = Auth::id() ?? 2; 
-        $wallet = DB::table('wallets')->where('ecomercant_id', $ecomercant_id)->first();
-        $retraits = DB::table('retraits')->where('ecomercant_id', $ecomercant_id)->orderBy('created_at', 'desc')->get();
-        return view('ecomercant.finances', compact('wallet', 'retraits'));
-    })->name('finances');
+// Formulaire de modification de structure d'un colis spécifique
+Route::get('/admin/colis/{id}/modifier', function ($id) {
+    $colisList = Colis::orderBy('created_at', 'desc')->get();
+    $ecommercants = Utilisateur::where('role', 'ecommercant')->get();
+    $colisEnCours = Colis::find($id);
+    $mode = 'creation'; 
 
-    // Enregistrement d'une nouvelle demande de retrait
-    Route::post('/finances/retrait/store', function (Request $request) {
-        $ecomercant_id = Auth::id() ?? 2; 
-        $request->validate(['montant' => 'required|numeric|min:10']);
+    return view('admin.colis.index', compact('colisList', 'ecommercants', 'mode', 'colisEnCours'));
+})->name('admin.colis.edit');
 
-        $wallet = DB::table('wallets')->where('ecomercant_id', $ecomercant_id)->first();
-        if (!$wallet || $wallet->solde < $request->montant) {
-            return redirect()->back()->with('error', 'Votre solde est insuffisant pour effectuer ce retrait ! ❌');
-        }
+// Enregistrement unifié ou mise à jour complète d'un colis
+Route::post('/admin/colis/store', function (Illuminate\Http\Request $request) {
+    $request->validate([
+        'code_barre'          => 'required|string',
+        'destinataire'        => 'required|string|max:255',
+        'prenom_destinataire' => 'required|string|max:255',
+        'telephone'           => 'required|string',
+        'ville'               => 'required|string',
+        'prix'                => 'required|numeric',
+        'ecommercant_id'      => 'required|exists:utilisateurs,id',
+    ]);
 
-        DB::table('retraits')->insert([
-            'ecomercant_id' => $ecomercant_id,
-            'montant' => $request->montant,
-            'statut' => 'en_attente',
-            'created_at' => now(),
-            'updated_at' => now(),
+    $colisExistant = \App\Models\Colis::where('code_suivi', $request->code_barre)->first();
+
+    if ($colisExistant) {
+        $colisExistant->update([
+            'nom_destinataire'       => $request->destinataire,
+            'prenom_destinataire'    => $request->prenom_destinataire,
+            'telephone_destinataire' => $request->telephone,
+            'adresse_destinataire'   => $request->ville, 
+            'prix'                   => $request->prix,
+            'ecommercant_id'         => $request->ecommercant_id,
         ]);
-        return redirect()->back()->with('success', 'Votre demande de retrait a été envoyée avec succès à l\'administrateur ! 🚀');
-    })->name('retrait.store');
+        $message = 'Colis mis à jour avec succès !';
+    } else {
+        \App\Models\Colis::create([
+            'code_suivi'             => $request->code_barre,
+            'nom_destinataire'       => $request->destinataire,
+            'prenom_destinataire'    => $request->prenom_destinataire,
+            'telephone_destinataire' => $request->telephone,
+            'adresse_destinataire'   => $request->ville, 
+            'poids'                  => 1.0, 
+            'prix'                   => $request->prix,
+            'statut'                 => 'enregistre', 
+            'ecommercant_id'         => $request->ecommercant_id,
+            'token_suivi'            => (string) \Illuminate\Support\Str::uuid(), 
+        ]);
+        $message = 'Colis enregistré avec succès !';
+    }
 
-    // Gestion de la logistique des colis
-    Route::get('/colis', [ColisController::class, 'mesColis'])->name('colis.index');
-    Route::get('/colis/creer', [ColisController::class, 'create'])->name('colis.create');
-    Route::post('/colis', [ColisController::class, 'store'])->name('colis.store');
-    Route::get('/colis/{colis}', [ColisController::class, 'show'])->name('colis.show');
-});
+    return redirect()->route('admin.colis.index')->with('success', $message);
+})->name('admin.colis.store');
 
+// Suppression définitive d'un colis de la base de données
+Route::delete('/admin/colis/{id}/supprimer', function ($id) {
+    Colis::where('id', $id)->delete();
+    return redirect()->route('admin.colis.index')->with('success', 'Colis supprimé avec succès !');
+})->name('admin.colis.destroy');
 
 /*
 |--------------------------------------------------------------------------
-| Espace Livreur (Protégé par Auth et le rôle Livreur)
+| Espace E-commerçant (Protégé par Auth et le rôle ecommercant)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ecommercant.')->group(function () {
+    
+    // 1. Tableau de bord dynamique de l'E-commerçant connecté avec calcul des statistiques
+    Route::get('/dashboard', function () {
+        $totalColis = Colis::where('ecommercant_id', auth()->id())->count();
+        $livres = Colis::where('ecommercant_id', auth()->id())->where('statut', 'Livré')->count();
+        $enCours = Colis::where('ecommercant_id', auth()->id())->where('statut', 'En cours')->count();
+        // Correction de la variable pour correspondre exactement à dashboard.blade.php
+        $retournes = Colis::where('ecommercant_id', auth()->id())->where('statut', 'Retourné')->count();
+
+        return view('ecommercant.dashboard', compact('totalColis', 'livres', 'enCours', 'retournes'));
+    })->name('dashboard');
+
+    // 2. Consultation et détails du portefeuille financier de l'E-commerçant via le WalletController
+    Route::get('/finances', [WalletController::class, 'getWalletDetails'])->name('finances');
+
+    // 3. Affichage de la liste filtrée des colis de l'E-commerçant connecté
+    Route::get('/colis', [ColisController::class, 'index'])->name('colis.index');
+
+    // 4. Affichage du formulaire de création de colis pour l'E-commerçant
+    Route::get('/colis/creer', function () {
+        return view('ecommercant.colis.create');
+    })->name('colis.create');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Espace Livreur (Protégé par Auth et le rôle livreur)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:livreur'])->prefix('livreur')->name('livreur.')->group(function () {
-    Route::get('/dashboard', fn() => view('livreur.dashboard'))->name('dashboard');
-    Route::put('/colis/{colis}/statut', [ColisController::class, 'changerStatut'])->name('colis.statut');
-    Route::get('/mes-affectations', [AffectationController::class, 'mesAffectations'])->name('affectations.index'); 
+    
+    // Tableau de bord du livreur avec compte des colis assignés
+    Route::get('/dashboard', function () {
+        $colisCount = Affectation::where('livreur_id', auth()->id())
+            ->whereIn('statut', ['en_attente', 'en_cours'])
+            ->count();
+        
+        return view('livreur.dashboard', compact('colisCount')); 
+    })->name('dashboard');
+
+    // Liste complète des colis assignés au livreur actuellement connecté
+    Route::get('/mes-livraisons', function () {
+        $affectations = Affectation::with('colis')
+            ->where('livreur_id', auth()->id())
+            ->latest()
+            ->get();
+            
+        return view('livreur.colis.index', compact('affectations')); 
+    })->name('mes_livraisons');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Route Temporaire de Génération / Réinitialisation du Compte de Test
+|--------------------------------------------------------------------------
+*/
+Route::get('/create-ecom', function () {
+    
+    $oldUser = \App\Models\Utilisateur::where('email', 'ecom@nwsallik.com')->first();
+    if ($oldUser) {
+        \App\Models\Wallet::where('ecommercant_id', $oldUser->id)->delete();
+        $oldUser->delete();
+    }
+    
+    $user = \App\Models\Utilisateur::create([
+        'nom' => 'Nwsallik',
+        'prenom' => 'Ecom',
+        'email' => 'ecom@nwsallik.com',
+        'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+        'role' => 'ecommercant',
+        'statut' => true 
+    ]);
+    \App\Models\Wallet::create([
+        'ecommercant_id' => $user->id,
+        'solde' => 0.00
+    ]);
+    
+    return "Le compte E-commerçant et son WALLET ont été créés avec succès ! Utilisez 'password123'.";
 });

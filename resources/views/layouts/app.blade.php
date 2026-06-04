@@ -17,43 +17,53 @@
                     <i class="fas fa-box-open text-indigo-500"></i> MonColis
                 </h1>
             </div>
-            
             <nav class="flex-1 p-4 space-y-2">
-                @if(request()->is('admin*'))
-                    <a href="/admin/dashboard" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-chart-pie mr-2"></i>Dashboard</a>
-                    <a href="/admin/colis" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-boxes mr-2"></i>Colis</a>
-                    <a href="/admin/users" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-users mr-2"></i>Utilisateurs</a>
-                    <a href="/admin/livreurs" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-truck mr-2"></i>Livreurs</a>
-                    <a href="/admin/ecommercants" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-store mr-2"></i>E-commerçants</a>
-                    <a href="/admin/affectations" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-route mr-2"></i>Affectations</a>
-                    <a href="/admin/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-wallet mr-2"></i>Finances</a>
-                    <a href="/admin/audit" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-history mr-2"></i>Audit Log</a>
-                @else
-                <!-- 📊 Mon Dashboard -->
-<a href="/ecomercant/dashboard" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
-    <i class="fas fa-chart-pie mr-2"></i> Mon Dashboard
-</a>
+    
+    <!-- 1 ADMIN -->
+         @if(auth()->user()->role === 'admin')
+        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-chart-pie mr-2"></i>Dashboard</a>
+        <a href="{{ route('admin.colis.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-boxes mr-2"></i>Colis</a>
+        <a href="{{ route('admin.administrateurs.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-user-shield mr-2"></i>Administrateurs</a>
+        <a href="{{ route('admin.livreurs.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-truck mr-2"></i>Livreurs</a>
+        <a href="{{ route('admin.ecommercants.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-store mr-2"></i>E-commerçants</a>
+        <a href="{{ route('admin.affectations.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-route mr-2"></i>Affectations</a>
+        <a href="{{ route('admin.finances.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-wallet mr-2"></i>Finances</a>
+        <a href="{{ route('admin.audit.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-history mr-2"></i>Audit Log</a>
 
-<!-- 📦 Mes Colis -->
-<a href="/ecomercant/colis" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
-    <i class="fas fa-boxes mr-2"></i> Mes Colis
-</a>
+    <!-- 2️⃣LIVREUR  -->
+    @elseif(auth()->user()->role === 'livreur')
+        <a href="{{ route('livreur.dashboard') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
+            <i class="fas fa-chart-pie mr-2"></i> Dashboard
+        </a>
+        <a href="{{ route('livreur.mes_livraisons') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
+            <i class="fas fa-truck mr-2"></i> Mes Livraisons
+        </a>
 
-<!-- 💳 Mon Wallet -->
-<a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
-    <i class="fas fa-wallet mr-2"></i> Mon Wallet
-</a>
+    <!-- 3️⃣E-COMMERÇANT -->
+    @else
+        <a href="/ecomercant/dashboard" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
+            <i class="fas fa-chart-pie mr-2"></i> Mon Dashboard
+        </a>
+        <a href="/ecomercant/colis" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
+            <i class="fas fa-boxes mr-2"></i> Mes Colis
+        </a>
+        <a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
+            <i class="fas fa-wallet mr-2"></i> Mon Wallet
+        </a>
+        <a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
+            <i class="fas fa-hand-holding-usd mr-2"></i> Demande Retrait
+        </a>
+    @endif
 
-<!-- 💸 Demande Retrait -->
-<a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
-    <i class="fas fa-hand-holding-usd mr-2"></i> Demande Retrait
-</a>
-                @endif
-            </nav>
+</nav>
+            
             <div class="p-4 border-t border-slate-800">
-                <a href="/logout" class="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg font-medium transition">
-                    <i class="fas fa-sign-out-alt w-5"></i> Déconnexion
-                </a>
+                <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
+                    @csrf
+                    <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg font-medium transition bg-transparent border-0 cursor-pointer text-left">
+                        <i class="fas fa-sign-out-alt w-5"></i> Déconnexion
+                    </button>
+                </form>
             </div>
         </div>
 

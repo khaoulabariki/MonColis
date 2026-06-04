@@ -6,17 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Exécuter les migrations pour la création de la table 'colis'.
+     */
     public function up(): void
     {
         Schema::create('colis', function (Blueprint $table) {
-            $table->id();
-            $table->string('code_suivi')->unique();
-            $table->string('nom_destinataire');
-            $table->string('prenom_destinataire');
-            $table->string('telephone_destinataire');
-            $table->string('adresse_destinataire');
-            $table->float('poids');
-            $table->decimal('prix', 10, 2);
+            $table->id(); // Identifiant unique du colis (Clé primaire)
+            $table->string('code_suivi')->unique(); // Code de suivi unique pour le tracking
+            $table->string('nom_destinataire'); // Nom du destinataire
+            $table->string('prenom_destinataire'); // Prénom du destinataire
+            $table->string('telephone_destinataire'); // Téléphone du destinataire
+            $table->string('adresse_destinataire'); // Adresse de livraison
+            $table->float('poids'); // Poids du colis en kg
+            $table->decimal('prix', 10, 2); // Prix du colis (Ex: 150.00 DH)
+            
+            // Statut actuel du colis dans le processus de livraison
             $table->enum('statut', [
                 'enregistre',
                 'ramasse',
@@ -25,14 +30,28 @@ return new class extends Migration
                 'retourne',
                 'annule'
             ])->default('enregistre');
-            $table->string('token_suivi')->unique();
-            $table->foreignId('ecomercant_id')
+            
+            $table->string('token_suivi')->unique(); // Token sécurisé unique pour le suivi public
+            
+            // Relation avec le e-commerçant propriétaire du colis (Clé étrangère)
+            // Modification: 'ecommercant_id' avec deux 'm' pour correspondre au rôle utilisateur
+            $table->foreignId('ecommercant_id')
                   ->constrained('utilisateurs')
                   ->onDelete('cascade');
-            $table->timestamps();
+            
+            // Relation avec le livreur assigné (Clé étrangère, peut être nulle au début)
+            $table->foreignId('livreur_id')
+                  ->nullable()
+                  ->constrained('utilisateurs')
+                  ->onDelete('set null');
+                  
+            $table->timestamps(); // Colonnes 'created_at' et 'updated_at'
         });
     }
 
+    /**
+     * Annuler les migrations (Supprimer la table).
+     */
     public function down(): void
     {
         Schema::dropIfExists('colis');

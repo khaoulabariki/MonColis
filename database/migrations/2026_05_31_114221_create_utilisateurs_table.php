@@ -13,10 +13,11 @@ return new class extends Migration
             $table->string('nom');
             $table->string('prenom');
             $table->string('email')->unique();
-            $table->string('mot_de_passe');
-            $table->enum('role', ['admin', 'ecomercant', 'livreur']);
+            $table->string('password'); 
+            $table->enum('role', ['admin', 'ecommercant', 'livreur']); 
             $table->string('telephone')->nullable();
             $table->boolean('statut')->default(true);
+            $table->rememberToken(); 
             $table->timestamps();
         });
     }

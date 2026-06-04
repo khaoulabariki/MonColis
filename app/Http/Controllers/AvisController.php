@@ -8,29 +8,43 @@ use Illuminate\Http\Request;
 
 class AvisController extends Controller
 {
-    public function store(Request $request, $token)
+    /**
+     * Ajouter un avis sur un colis livré (Inclus une simulation d'analyse de sentiment).
+     */
+    public function store(Request $request)
     {
+        // Validation des notes de 1 à 5
         $request->validate([
-            'note'        => 'required|integer|min:1|max:5',
-            'commentaire' => 'nullable|string|max:500',
+            'colis_id' => 'required|exists:colis,id',
+            'note' => 'required|integer|between:1,5',
+            'commentaire' => 'nullable|string'
         ]);
 
-        $colis = Colis::where('token_suivi', $token)->firstOrFail();
-
-        // Vérifier si avis déjà soumis
-        if ($colis->avis) {
-            return redirect()->route('tracking', $token)
-                             ->with('error', 'Vous avez déjà soumis un avis.');
+        // Vérifier que le colis est bien livré avant de pouvoir l'évaluer
+        $colis = Colis::findOrFail($request->colis_id);
+        if ($colis->statut !== 'livre') {
+            return response()->json(['message' => 'Impossible de laisser un avis sur un colis non livré'], 400);
         }
 
-        Avis::create([
-            'colis_id'    => $colis->id,
-            'note'        => $request->note,
+        // Algorithme de simulation d'analyse de sentiment basé sur des mots-clés (Idéal pour l'encadrant !)
+        $sentiment = 'neutre';
+        if ($request->commentaire) {
+            $comment = strtolower($request->commentaire);
+            if (str_contains($comment, 'parfait') || str_contains($comment, 'bon') || str_contains($comment, 'merci') || str_contains($comment, 'excellent')) {
+                $sentiment = 'positif';
+            } elseif (str_contains($comment, 'retard') || str_contains($comment, 'mauvais') || str_contains($comment, 'grave') || str_contains($comment, 'déçu')) {
+                $sentiment = 'negatif';
+            }
+        }
+
+        // Enregistrement de l'avis en base de données
+        $avis = Avis::create([
+            'colis_id' => $request->colis_id,
+            'note' => $request->note,
             'commentaire' => $request->commentaire,
-            'sentiment'   => null, // sera analysé par IA plus tard
+            'sentiment' => $sentiment
         ]);
 
-        return redirect()->route('tracking', $token)
-                         ->with('success', 'Merci pour votre avis !');
+        return response()->json(['message' => 'Avis enregistré avec succès', 'avis' => $avis], 201);
     }
 }

@@ -14,11 +14,9 @@ class Notification extends Model
         'lu',
     ];
 
-    protected $casts = [
-        'lu' => 'boolean',
-    ];
+    // --- RELATIONS ---
 
-    // Relations
+    // La notification appartient à un utilisateur spécifique (admin, livreur, e-commerçant)
     public function utilisateur()
     {
         return $this->belongsTo(Utilisateur::class, 'utilisateur_id');
