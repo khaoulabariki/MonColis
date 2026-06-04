@@ -13,11 +13,11 @@
     <aside style="width:256px; background-color:#4f46e5; color:white; display:flex; flex-direction:column;">
         <div class="p-6 text-2xl font-bold border-b border-indigo-600">MonColis</div>
         <nav class="flex-1 p-4 space-y-2">
-            <a href="{{ route('ecomercant.dashboard') }}" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Dashboard</a>
-            <a href="{{ route('ecomercant.colis.index') }}" class="block px-4 py-2 rounded-lg bg-indigo-800">Mes Colis</a>
-            <a href="{{ route('ecomercant.colis.create') }}" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Nouveau Colis</a>
-           <a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"> Mon Wallet</a>
-           <a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"> Retraits</a>
+            <a href="{{ route('ecommercant.dashboard') }}" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Dashboard</a>
+            <a href="{{ route('ecommercant.colis.index') }}" class="block px-4 py-2 rounded-lg bg-indigo-800">Mes Colis</a>
+            <a href="{{ route('ecommercant.colis.create') }}" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Nouveau Colis</a>
+           <a href="/ecommercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"> Mon Wallet</a>
+           <a href="/ecommercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"> Retraits</a>
         </nav>
         <div class="p-4 border-t border-indigo-600">
             <form method="POST" action="{{ route('logout') }}">
@@ -31,7 +31,7 @@
     <main class="flex-1 p-8">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Mes Colis</h1>
-            <a href="{{ route('ecomercant.colis.create') }}"
+            <a href="{{ route('ecommercant.colis.create') }}"
                 class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
                 + Nouveau Colis
             </a>
@@ -93,9 +93,7 @@
                     @endforelse
                 </tbody>
             </table>
-            <div class="px-6 py-4 border-t border-gray-100">
-                {{ $colis->links() }}
-            </div>
+           
         </div>
     </main>
 </div>

@@ -24,6 +24,7 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        
         // Validation des champs du formulaire
         $request->validate([
             'email' => 'required|email',

@@ -24,7 +24,7 @@
     <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
         <h4 class="text-base font-bold text-slate-800 mb-4"><i class="fas fa-hand-holding-usd text-indigo-500 mr-2"></i>Demander un Retrait</h4>
         
-        <form action="/ecomercant/finances/retrait/store" method="POST" class="space-y-4">
+        <form action="/ecommercant/finances/retrait/store" method="POST" class="space-y-4">
             @csrf
             <div>
                 <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Montant à retirer (DH)</label>

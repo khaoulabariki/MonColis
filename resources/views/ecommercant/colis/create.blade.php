@@ -13,11 +13,11 @@
     <aside style="width:256px; background-color:#4f46e5; color:white; display:flex; flex-direction:column;">
         <div class="p-6 text-2xl font-bold border-b border-indigo-600">MonColis</div>
         <nav class="flex-1 p-4 space-y-2">
-            <a href="{{ route('ecomercant.dashboard') }}" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Dashboard</a>
-            <a href="{{ route('ecomercant.colis.index') }}" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Mes Colis</a>
-            <a href="{{ route('ecomercant.colis.create') }}" class="block px-4 py-2 rounded-lg bg-indigo-800">Nouveau Colis</a>
-             <a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"> Mon Wallet</a>
-           <a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"> Retraits</a>
+            <a href="{{ route('ecommercant.dashboard') }}" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Dashboard</a>
+            <a href="{{ route('ecommercant.colis.index') }}" class="block px-4 py-2 rounded-lg hover:bg-indigo-600">Mes Colis</a>
+            <a href="{{ route('ecommercant.colis.create') }}" class="block px-4 py-2 rounded-lg bg-indigo-800">Nouveau Colis</a>
+             <a href="{{ route('ecommercant.finances') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"> Mon Wallet</a>
+           <a href="{{ route('ecommercant.finances') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"> Retraits</a>
         </nav>
         <div class="p-4 border-t border-indigo-600">
             <form method="POST" action="{{ route('logout') }}">
@@ -44,7 +44,7 @@
         @endif
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-2xl">
-            <form method="POST" action="{{ route('ecomercant.colis.store') }}">
+            <form method="POST" action="{{ route('ecommercant.colis.store') }}">
                 @csrf
 
                 <div class="grid grid-cols-2 gap-4 mb-4">

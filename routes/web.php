@@ -315,7 +315,15 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
     Route::get('/finances', [WalletController::class, 'getWalletDetails'])->name('finances');
 
     // 3. Affichage de la liste filtrée des colis de l'E-commerçant connecté
-    Route::get('/colis', [ColisController::class, 'index'])->name('colis.index');
+    Route::get('/colis', function () {
+        $colis = \App\Models\Colis::where('ecommercant_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        return view('ecommercant.colis.index', compact('colis'));
+    })->name('colis.index');
+    
+    Route::post('/colis', [\App\Http\Controllers\ColisController::class, 'store'])->name('colis.store');
 
     // 4. Affichage du formulaire de création de colis pour l'E-commerçant
     Route::get('/colis/creer', function () {
@@ -367,14 +375,16 @@ Route::get('/create-ecom', function () {
         'nom' => 'Nwsallik',
         'prenom' => 'Ecom',
         'email' => 'ecom@nwsallik.com',
-        'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+        'password' => bcrypt('password123'),
         'role' => 'ecommercant',
         'statut' => true 
     ]);
+
+    
     \App\Models\Wallet::create([
         'ecommercant_id' => $user->id,
         'solde' => 0.00
     ]);
     
-    return "Le compte E-commerçant et son WALLET ont été créés avec succès ! Utilisez 'password123'.";
+    return "Compte de test E-commerçant créé avec succès ! ";
 });

@@ -41,16 +41,16 @@
 
     <!-- 3️⃣E-COMMERÇANT -->
     @else
-        <a href="/ecomercant/dashboard" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
+        <a href="/ecommercant/dashboard" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
             <i class="fas fa-chart-pie mr-2"></i> Mon Dashboard
         </a>
-        <a href="/ecomercant/colis" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
+        <a href="/ecommercant/colis" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
             <i class="fas fa-boxes mr-2"></i> Mes Colis
         </a>
-        <a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
+        <a href="/ecommercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
             <i class="fas fa-wallet mr-2"></i> Mon Wallet
         </a>
-        <a href="/ecomercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
+        <a href="/ecommercant/finances" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
             <i class="fas fa-hand-holding-usd mr-2"></i> Demande Retrait
         </a>
     @endif
