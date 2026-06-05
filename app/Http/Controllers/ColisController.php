@@ -79,25 +79,52 @@ class ColisController extends Controller
         return redirect()->back()->with('success', 'Livreur assigné avec succès !');
     }
 
-    /**
-     * Mettre à jour le statut d'un colis (utilisé par le livreur).
+  /**
+     * Mettre à jour le statut d'un colis et créditer le wallet si livré.
      */
     public function updateStatut(Request $request, $id)
     {
-        // Validation du statut envoyé
+        // 1. التأكد من أن الحالة صيفطها الفورم
         $request->validate([
             'statut' => 'required|string',
         ]);
 
-        // Trouver le colis par son ID
+        // 2. البحث عن الكوليس
         $colis = \App\Models\Colis::findOrFail($id);
+        
+        $ancienStatut = $colis->statut;
+        $nouveauStatut = $request->statut;
 
-        // Mettre à jour le statut dans la base de données
+        // 3. تحديث حالة الكوليس ف الجدول
         $colis->update([
-            'statut' => $request->statut,
+            'statut' => $nouveauStatut,
         ]);
 
-        // Retourner à la page précédente avec un message de succès
-        return redirect()->back()->with('success', 'Le statut du colis a été mis à jour avec succès !');
+        // 🎯 الـ Logic السحري عند التوصيل الناجح
+        if ($nouveauStatut === 'livre' && $ancienStatut !== 'livre') {
+            
+            // حددنا هنا الفيكس د التوصيل (مثلا 50 درهم)
+            $fraisLivraison = 50; 
+            $netEcommercant = $colis->prix - $fraisLivraison;
+
+            // أ. البحث عن الـ Wallet ديال مول الكوليس (ecommercant) وزيادة الصافي ليه
+            $wallet = \App\Models\Wallet::where('ecommercant_id', $colis->ecommercant_id)->first();
+
+            if ($wallet) {
+                // زيادة الثمن ناقص 50 درهم للإيكوميرصان
+                $wallet->increment('solde', $netEcommercant);
+
+                // تسجيل العملية ف جدول الـ Transactions
+                \App\Models\Transaction::create([
+                    'wallet_id' => $wallet->id,
+                    'type'      => 'credit', 
+                    'montant'   => $netEcommercant,
+                    'description' => "Livraison réussie du colis " . $colis->code_suivi . " (Frais de livraison -50 DH)",
+                ]);
+            }
+        }
+
+        // 4. الرجوع مع ميساج نجاح
+        return redirect()->back()->with('success', 'Le statut a été mis à jour avec succès !');
     }
 }

@@ -305,7 +305,6 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
         $totalColis = Colis::where('ecommercant_id', auth()->id())->count();
         $livres = Colis::where('ecommercant_id', auth()->id())->where('statut', 'Livré')->count();
         $enCours = Colis::where('ecommercant_id', auth()->id())->where('statut', 'En cours')->count();
-        // Correction de la variable pour correspondre exactement à dashboard.blade.php
         $retournes = Colis::where('ecommercant_id', auth()->id())->where('statut', 'Retourné')->count();
 
         return view('ecommercant.dashboard', compact('totalColis', 'livres', 'enCours', 'retournes'));
@@ -313,6 +312,9 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
 
     // 2. Consultation et détails du portefeuille financier de l'E-commerçant via le WalletController
     Route::get('/finances', [WalletController::class, 'getWalletDetails'])->name('finances');
+
+    // Route de soumission pour une demande de retrait (Placée ici dans le bon Espace et le bon Préfixe)
+    Route::post('/finances/retrait', [RetraitController::class, 'demanderRetrait'])->name('retrait.store');
 
     // 3. Affichage de la liste filtrée des colis de l'E-commerçant connecté
     Route::get('/colis', function () {
@@ -381,7 +383,6 @@ Route::get('/create-ecom', function () {
         'statut' => true 
     ]);
 
-    
     \App\Models\Wallet::create([
         'ecommercant_id' => $user->id,
         'solde' => 0.00
