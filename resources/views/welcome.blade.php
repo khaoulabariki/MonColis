@@ -4,20 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MonColis - Transport & Livraison Nationale</title>
-    <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-slate-50 font-sans antialiased text-slate-800">
 
-    <!-- 🌟 NAVBAR PREMIUM -->
     <nav class="bg-white border-b border-slate-100 sticky top-0 z-50 shadow-sm backdrop-blur-md bg-white/90">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <i class="fas fa-box-open text-2xl text-indigo-600"></i>
                 <span class="text-xl font-black text-slate-900 tracking-tight">MonColis<span class="text-indigo-600">.</span></span>
             </div>
-            <!-- Menu Links -->
             <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
                 <a href="#suivi" class="hover:text-indigo-600 transition">Suivre un Colis</a>
                 <a href="#services" class="hover:text-indigo-600 transition">Nos Services</a>
@@ -26,13 +23,12 @@
             <div class="flex items-center gap-4">
                 <a href="/login" class="text-sm font-bold text-slate-600 hover:text-indigo-600 transition">Connexion</a>
                 <a href="{{ route('register') }}" class="bg-indigo-600 text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-indigo-700 transition shadow-sm shadow-indigo-200">
-    Espace Pro
-</a>
+                    Espace Pro
+                </a>
             </div>
         </div>
     </nav>
 
-    <!-- 🚀 HERO SECTION + ESPACE SUIVI CENTRAL -->
     <header id="suivi" class="py-20 md:py-28 bg-gradient-to-b from-white to-slate-50 border-b border-slate-100">
         <div class="max-w-4xl mx-auto px-6 text-center">
             <span class="bg-indigo-50 text-indigo-700 text-xs font-black px-3.5 py-1.5 rounded-full uppercase tracking-wider border border-indigo-100">
@@ -45,7 +41,6 @@
                 Suivez votre expédition instantanément. Entrez le code de suivi de votre colis ci-dessous pour voir l'état de livraison.
             </p>
 
-            <!-- 🔍 FORMULAIRE DE RECHERCHE D'EXPÉDITION -->
             <div class="mt-10 max-w-2xl mx-auto">
                 <form action="/tracking" method="GET" class="bg-white p-2.5 rounded-2xl shadow-2xl border border-slate-100 flex flex-col md:flex-row gap-2">
                     <div class="flex-1 flex items-center gap-3 px-3">
@@ -53,13 +48,12 @@
                         <input type="text" name="code" value="{{ $code ?? '' }}" required placeholder="Entrez le code de suivi (Ex: MC-8893)" 
                             class="w-full h-12 bg-transparent text-slate-800 font-semibold placeholder-slate-400 focus:outline-none">
                     </div>
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 h-12 rounded-xl transition shadow-lg shadow-indigo-200 whitespace-nowrap">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 h-12 rounded-xl transition shadow-lg shadow-indigo-200 whitespace-nowrap cursor-pointer">
                         <i class="fas fa-crosshairs mr-2"></i> Localiser le colis
                     </button>
                 </form>
             </div>
 
-            <!-- 📦 TIMELINE D'ÉTAT DYNAMIQUE -->
             @if(isset($code))
                 <div class="mt-12 max-w-2xl mx-auto bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-2xl text-left transform transition-all duration-300 scale-100">
                     @if($colis)
@@ -73,10 +67,8 @@
                             </span>
                         </div>
 
-                        <!-- 🛤️ THE INTERACTIVE TIMELINE -->
                         <div class="relative pl-7 space-y-8 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
                             
-                            <!-- Étape 1: Reçu -->
                             <div class="relative flex items-start gap-4">
                                 <div class="absolute -left-7 w-4.5 h-4.5 rounded-full border-4 border-white shadow bg-emerald-500"></div>
                                 <div>
@@ -85,26 +77,62 @@
                                 </div>
                             </div>
 
-                            <!-- Étape 2: En cours -->
                             <div class="relative flex items-start gap-4">
-                                <div class="absolute -left-7 w-4.5 h-4.5 rounded-full border-4 border-white shadow {{ in_array($colis->statut, ['en_cours', 'livre']) ? 'bg-emerald-500' : 'bg-slate-300' }}"></div>
+                                <div class="absolute -left-7 w-4.5 h-4.5 rounded-full border-4 border-white shadow {{ in_array(strtolower($colis->statut), ['en_cours', 'livre', 'livré']) ? 'bg-emerald-500' : 'bg-slate-300' }}"></div>
                                 <div>
-                                    <h5 class="text-sm font-bold {{ in_array($colis->statut, ['en_cours', 'livre']) ? 'text-slate-800' : 'text-slate-400' }}">En cours de livraison</h5>
+                                    <h5 class="text-sm font-bold {{ in_array(strtolower($colis->statut), ['en_cours', 'livre', 'livré']) ? 'text-slate-800' : 'text-slate-400' }}">En cours de livraison</h5>
                                     <p class="text-xs text-slate-400">Le colis est actuellement pris en charge par notre livreur de zone.</p>
                                 </div>
                             </div>
 
-                            <!-- Étape 3: Livré -->
                             <div class="relative flex items-start gap-4">
-                                <div class="absolute -left-7 w-4.5 h-4.5 rounded-full border-4 border-white shadow {{ $colis->statut == 'livre' ? 'bg-emerald-500' : 'bg-slate-300' }}"></div>
+                                <div class="absolute -left-7 w-4.5 h-4.5 rounded-full border-4 border-white shadow {{ in_array(strtolower($colis->statut), ['livre', 'livré']) ? 'bg-emerald-500' : 'bg-slate-300' }}"></div>
                                 <div>
-                                    <h5 class="text-sm font-bold {{ $colis->statut == 'livre' ? 'text-slate-800' : 'text-slate-400' }}">Livré à destination 🎉</h5>
+                                    <h5 class="text-sm font-bold {{ in_array(strtolower($colis->statut), ['livre', 'livré']) ? 'text-slate-800' : 'text-slate-400' }}">Livré à destination 🎉</h5>
                                     <p class="text-xs text-slate-400">Colis remis en main propre au destinataire final avec succès.</p>
                                 </div>
                             </div>
                         </div>
+
+                        @if(in_array(strtolower($colis->statut), ['livre', 'livré']))
+                            <div class="mt-8 pt-6 border-t border-slate-100">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="p-2 bg-indigo-50 rounded-xl text-indigo-600 text-sm">
+                                        <i class="fas fa-robot"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-800">Votre avis compte pour notre IA</h4>
+                                        <p class="text-xs text-slate-400">Laissez un commentaire sur le livreur ou la rapidité du service.</p>
+                                    </div>
+                                </div>
+
+                                @if(session('success'))
+                                    <div class="mb-3 p-3 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl text-xs font-semibold">
+                                        <i class="fas fa-check-circle mr-1"></i> {{ session('success') }}
+                                    </div>
+                                @endif
+
+                                @if(session('error'))
+                                    <div class="mb-3 p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-semibold">
+                                        <i class="fas fa-times-circle mr-1"></i> {{ session('error') }}
+                                    </div>
+                                @endif
+
+                                <form action="{{ route('avis.store', $colis->token_suivi ?? $colis->id) }}" method="POST" class="space-y-3">
+                                    @csrf
+                                    <div>
+                                        <textarea name="commentaire" rows="3" required 
+                                                  placeholder="Ecrivez votre avis sur la livraison, le livreur ou la rapidité du service" 
+                                                  class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 text-xs font-medium transition bg-slate-50 focus:bg-white"></textarea>
+                                    </div>
+                                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md shadow-indigo-100 cursor-pointer">
+                                        Soumettre l'avis pour analyse
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
+
                     @else
-                        <!-- ⚠️ Erreur code inexistant -->
                         <div class="text-center py-6">
                             <div class="bg-rose-50 text-rose-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto text-lg mb-3">
                                 <i class="fas fa-exclamation-triangle"></i>
@@ -118,7 +146,6 @@
         </div>
     </header>
 
-    <!-- ✨ SECTION MARKETING 1: POURQUOI NOUS? -->
     <section id="services" class="py-16 bg-white">
         <div class="max-w-6xl mx-auto px-6">
             <div class="text-center mb-12">
@@ -145,7 +172,6 @@
         </div>
     </section>
 
-    <!-- 👣 FOOTER -->
     <footer class="bg-slate-900 text-slate-500 py-12 border-t border-slate-800">
         <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-sm">
             <div class="flex items-center gap-2">

@@ -13,7 +13,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ColisController;
 use App\Http\Controllers\AffectationController;
 use App\Http\Controllers\AvisController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UtilisateurController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\RetraitController;
 use App\Http\Controllers\AuditLogController;
@@ -128,102 +128,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/finances', [TransactionController::class, 'index'])->name('finances.index');
     Route::post('/finances/retrait/{id}/valider', [RetraitController::class, 'traiterRetrait'])->name('finances.valider');
 
-    // 5. GESTION DES UTILISATEURS
+    // 5. GESTION DES UTILISATEURS (🎯 Reliée proprement à UtilisateurController)
     
     // --- SECTION : ADMINISTRATEURS ---
-    Route::get('/administrateurs', function() {
-        $adminsList = Utilisateur::where('role', 'admin')->get();
-        return view('admin.administrateurs.index', compact('adminsList'));
-    })->name('administrateurs.index');
-
-    Route::post('/administrateurs/store', function (Request $request) {
-        $request->validate([
-            'nom' => 'required|string|max:255',
-            'prenom' => 'required|string|max:255',
-            'email' => 'required|email|unique:utilisateurs,email',
-            'password' => 'required|min:6',
-        ]);
-        Utilisateur::create([
-            'nom' => $request->nom,
-            'prenom' => $request->prenom,
-            'email' => $request->email,
-            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
-            'role' => 'admin',
-            'statut' => true
-        ]);
-        return redirect()->route('admin.administrateurs.index')->with('success', 'Administrateur ajouté avec succès !');
-    })->name('administrateurs.store');
-
-    Route::delete('/administrateurs/{id}/supprimer', function ($id) {
-        Utilisateur::where('id', $id)->delete();
-        return redirect()->route('admin.administrateurs.index')->with('success', 'Administrateur supprimé avec succès !');
-    })->name('administrateurs.destroy');
-
+    Route::get('/administrateurs', [UtilisateurController::class, 'indexAdmin'])->name('administrateurs.index');
+    Route::post('/administrateurs/store', [UtilisateurController::class, 'storeAdmin'])->name('administrateurs.store');
+    Route::delete('/administrateurs/{id}/supprimer', [UtilisateurController::class, 'destroyAdmin'])->name('administrateurs.destroy');
 
     // --- SECTION : LIVREURS ---
-    Route::get('/livreurs', function() {
-        $livreursList = Utilisateur::where('role', 'livreur')->get();
-        return view('admin.livreurs.index', compact('livreursList'));
-    })->name('livreurs.index');
-
-    Route::post('/livreurs/store', function (Request $request) {
-        $request->validate([
-            'nom' => 'required|string|max:255',
-            'prenom' => 'required|string|max:255',
-            'email' => 'required|email|unique:utilisateurs,email',
-            'password' => 'required|min:6',
-        ]);
-
-        Utilisateur::create([
-            'nom' => $request->nom,
-            'prenom' => $request->prenom,
-            'email' => $request->email,
-            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
-            'role' => 'livreur',
-            'telephone' => $request->telephone ?? null,
-            'statut' => true
-        ]);
-        return redirect()->route('admin.livreurs.index')->with('success', 'Livreur ajouté avec succès !');
-    })->name('livreurs.store');
-
-    Route::delete('/livreurs/{id}/supprimer', function ($id) {
-        Utilisateur::where('id', $id)->delete();
-        return redirect()->route('admin.livreurs.index')->with('success', 'Livreur supprimé avec succès !');
-    })->name('livreurs.destroy');
-
+    Route::get('/livreurs', [UtilisateurController::class, 'indexLivreur'])->name('livreurs.index');
+    Route::post('/livreurs/store', [UtilisateurController::class, 'storeLivreur'])->name('livreurs.store');
+    Route::delete('/livreurs/{id}/supprimer', [UtilisateurController::class, 'destroyLivreur'])->name('livreurs.destroy');
 
     // --- SECTION : E-COMMERÇANTS ---
-    Route::get('/ecommercants', function() {
-        $ecommercantsList = Utilisateur::where('role', 'ecommercant')->get();
-        return view('admin.ecommercants.index', compact('ecommercantsList'));
-    })->name('ecommercants.index');
+    Route::get('/ecommercants', [UtilisateurController::class, 'indexEcom'])->name('ecommercants.index');
+    Route::post('/ecommercants/store', [UtilisateurController::class, 'storeEcom'])->name('ecommercants.store');
+    Route::delete('/ecommercants/{id}/supprimer', [UtilisateurController::class, 'destroyEcom'])->name('ecommercants.destroy');
 
-    Route::post('/ecommercants/store', function (Request $request) {
-        $request->validate([
-            'nom' => 'required|string|max:255',
-            'prenom' => 'required|string|max:255',
-            'email' => 'required|email|unique:utilisateurs,email',
-            'password' => 'required|min:6',
-        ]);
-
-        Utilisateur::create([
-            'nom' => $request->nom,
-            'prenom' => $request->prenom,
-            'email' => $request->email,
-            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
-            'role' => 'ecommercant',
-            'telephone' => $request->telephone ?? null,
-            'statut' => true
-        ]);
-        return redirect()->route('admin.ecommercants.index')->with('success', 'E-commerçant ajouté avec succès !');
-    })->name('ecommercants.store');
-
-    Route::delete('/ecommercants/{id}/supprimer', function ($id) {
-        Utilisateur::where('id', $id)->delete();
-        return redirect()->route('admin.ecommercants.index')->with('success', 'E-commerçant supprimé avec succès !');
-    })->name('ecommercants.destroy');
-
-    
     // 6. Gestion et suivi des affectations de colis aux livreurs
     Route::get('/affectations', [AffectationController::class, 'index'])->name('affectations.index');
     
