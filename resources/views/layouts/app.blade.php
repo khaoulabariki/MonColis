@@ -9,11 +9,20 @@
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800">
 
-    <div class="flex min-h-screen">
+    <div class="md:hidden bg-slate-900 text-white p-4 flex items-center justify-between shadow-md">
+        <h1 class="text-lg font-bold flex items-center gap-2">
+            <i class="fas fa-box-open text-indigo-500"></i> MonColis
+        </h1>
+        <button onclick="toggleMobileMenu()" class="text-white focus:outline-none p-2 cursor-pointer">
+            <i class="fas fa-bars text-xl" id="menuIcon"></i>
+        </button>
+    </div>
+
+    <div class="flex flex-col md:flex-row min-h-screen">
         
-        <!-- Sidebar Gauche -->
-        <div class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
-            <div class="p-6 border-b border-slate-800">
+        <div id="sidebar" class="hidden md:flex w-full md:w-64 bg-slate-900 text-slate-300 flex-col shadow-xl transition-all duration-300">
+            
+            <div class="p-6 border-b border-slate-800 hidden md:block">
                 <h1 class="text-xl font-bold text-white flex items-center gap-2">
                     <i class="fas fa-box-open text-indigo-500"></i> MonColis
                 </h1>
@@ -21,7 +30,6 @@
             
             <nav class="flex-1 p-4 space-y-2">
     
-                <!-- 1️⃣ MENU ADMIN -->
                 @if(auth()->user()->role === 'admin')
                     <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-chart-pie mr-2"></i>Dashboard</a>
                     <a href="{{ route('admin.colis.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-boxes mr-2"></i>Colis</a>
@@ -32,7 +40,6 @@
                     <a href="{{ route('admin.finances.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-wallet mr-2"></i>Finances</a>
                     <a href="{{ route('admin.audit.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fas fa-history mr-2"></i>Audit Log</a>
 
-                <!-- 2️⃣ MENU LIVREUR  -->
                 @elseif(auth()->user()->role === 'livreur')
                     <a href="{{ route('livreur.dashboard') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
                         <i class="fas fa-chart-pie mr-2"></i> Dashboard
@@ -41,7 +48,6 @@
                         <i class="fas fa-truck mr-2"></i> Mes Livraisons
                     </a>
 
-                <!-- 3️⃣ MENU E-COMMERÇANT -->
                 @else
                     <a href="/ecommercant/dashboard" class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">
                         <i class="fas fa-chart-pie mr-2"></i> Mon Dashboard
@@ -53,10 +59,8 @@
                         <i class="fas fa-wallet mr-2"></i> Mon Wallet
                     </a>
                     
-                    <!-- Lien interactif pour la Demande de Retrait -->
-                    <!-- Si on est déjà sur /finances, on ouvre directement le modal sans recharger la page. Sinon, on redirige avec un paramètre. -->
                     <a href="/ecommercant/finances?action=retrait" 
-                       onclick="if(window.location.pathname.includes('finances')) { event.preventDefault(); openRetraitModal(); }"
+                       onclick="if(window.location.pathname.includes('finances')) { event.preventDefault(); openRetraitModal(); } toggleMobileMenu();"
                        class="block px-4 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition cursor-pointer">
                         <i class="fas fa-hand-holding-usd mr-2"></i> Demande Retrait
                     </a>
@@ -64,7 +68,6 @@
 
             </nav>
             
-            <!-- Zone Déconnexion -->
             <div class="p-4 border-t border-slate-800">
                 <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
                     @csrf
@@ -75,14 +78,32 @@
             </div>
         </div>
 
-        <!-- Contenu Principal -->
-        <div class="flex-1 p-8 overflow-y-auto">
+        <div class="flex-1 p-4 md:p-8 overflow-y-auto w-full">
             @yield('content')
         </div>
 
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const menuIcon = document.getElementById('menuIcon');
+            
+            // Appliquer les changements uniquement si l'affichage correspond à un mobile
+            if (window.innerWidth < 768) {
+                sidebar.classList.toggle('hidden');
+                
+                // Permet de basculer l'icône entre le menu burger classique et la croix de fermeture (X)
+                if (sidebar.classList.contains('hidden')) {
+                    menuIcon.className = "fas fa-bars text-xl";
+                } else {
+                    menuIcon.className = "fas fa-times text-xl";
+                }
+            }
+        }
+    </script>
     @yield('scripts')
 </body>
 </html>

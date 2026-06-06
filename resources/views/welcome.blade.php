@@ -25,7 +25,9 @@
             </div>
             <div class="flex items-center gap-4">
                 <a href="/login" class="text-sm font-bold text-slate-600 hover:text-indigo-600 transition">Connexion</a>
-                <a href="/login" class="bg-indigo-600 text-white text-sm font-bold px-4 py-2 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition">Espace Pro</a>
+                <a href="{{ route('register') }}" class="bg-indigo-600 text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-indigo-700 transition shadow-sm shadow-indigo-200">
+    Espace Pro
+</a>
             </div>
         </div>
     </nav>

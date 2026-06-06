@@ -66,10 +66,7 @@ return [
 
     'passwords' => [
         'utilisateurs' => [ // Changement de la clé pour correspondre aux defaults
-            'provider' => 'utilisateurs', // Liaison avec le fournisseur personnalisé
-            'table' => 'password_reset_tokens',
-            'expire' => 60,
-            'throttle' => 60,
+            'provider' => 60,
         ],
     ],
 

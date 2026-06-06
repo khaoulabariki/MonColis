@@ -20,11 +20,19 @@ class AuthController extends Controller
     }
 
     /**
+     * Afficher le formulaire d'inscription autonome (Vue Register Blade).
+     */
+    public function showRegister()
+    {
+        // Retourne la vue auth.register.blade.php pour permettre l'inscription
+        return view('auth.register');
+    }
+
+    /**
      * Connexion de l'utilisateur (Gestion Session Web et API).
      */
     public function login(Request $request)
     {
-        
         // Validation des champs du formulaire
         $request->validate([
             'email' => 'required|email',
@@ -52,7 +60,6 @@ class AuthController extends Controller
 
         // 🎯 CORRECTION SÉCURITÉ & SESSION : 
         // Force l'authentification sur le guard 'web' et active le 'Remember Me' (true)
-        // pour éviter les déconnexions intempestives et les erreurs d'identification.
         Auth::guard('web')->login($utilisateur, true);
 
         // Sauvegarde explicite de l'ID en session pour consolider la persistance
@@ -115,7 +122,24 @@ class AuthController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'Compte créé avec succès', 'utilisateur' => $utilisateur], 201);
+        // Si la requête provient d'une API mobile (attend du JSON)
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Compte créé avec succès', 'utilisateur' => $utilisateur], 201);
+        }
+
+        // 🎯 POUR LE WEB : Connecter automatiquement le nouvel utilisateur après inscription
+        Auth::guard('web')->login($utilisateur, true);
+        $request->session()->put('utilisateur_id', $utilisateur->id);
+        $request->session()->regenerate();
+
+        // Redirection instantanée vers le bon Dashboard selon le rôle choisi
+        if ($utilisateur->role === 'ecommercant') {
+            return redirect()->route('ecommercant.dashboard')->with('success', 'Votre compte Pro E-commerçant a été créé avec succès !');
+        } elseif ($utilisateur->role === 'livreur') {
+            return redirect()->route('livreur.dashboard')->with('success', 'Votre compte de Livreur a été créé avec succès !');
+        }
+
+        return redirect('/tracking');
     }
 
     /**

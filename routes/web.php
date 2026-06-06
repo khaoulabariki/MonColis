@@ -47,6 +47,12 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+/* 👥 NOUVELLES ROUTES : INSCRIPTION AUTONOME (E-COMMERÇANT & LIVREUR) */
+// Affichage du formulaire d'inscription
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+// Traitement des données du formulaire et création du compte dans la BDD
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+
 // Suivi public via un jeton unique et dépôt d'avis clients
 Route::get('/suivi/{token}', [ColisController::class, 'tracking'])->name('tracking.public');
 Route::post('/suivi/{token}/avis', [AvisController::class, 'store'])->name('avis.store');
