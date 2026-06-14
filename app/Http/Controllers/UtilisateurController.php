@@ -17,18 +17,12 @@ class UtilisateurController extends Controller
      * =========================================================================
      */
 
-    /**
-     * Afficher la liste de tous les administrateurs.
-     */
     public function indexAdmin()
     {
         $adminsList = Utilisateur::where('role', 'admin')->get();
         return view('admin.administrateurs.index', compact('adminsList'));
     }
 
-    /**
-     * Enregistrer un nouvel administrateur dans la base de données.
-     */
     public function storeAdmin(Request $request)
     {
         $request->validate([
@@ -38,7 +32,7 @@ class UtilisateurController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        Utilisateur::create([
+        $adminUser = Utilisateur::create([
             'nom' => $request->nom,
             'prenom' => $request->prenom,
             'email' => $request->email,
@@ -47,15 +41,23 @@ class UtilisateurController extends Controller
             'statut' => true
         ]);
 
+        // 📝 Log précis pour la création d'un Admin
+        $this->logAction('CREATION_ADMIN', "L'administrateur a créé un nouveau compte administrateur : {$adminUser->nom} {$adminUser->prenom}.", 'ADMIN');
+
         return redirect()->route('admin.administrateurs.index')->with('success', 'Administrateur ajouté avec succès !');
     }
 
-    /**
-     * Supprimer un administrateur spécifique de la base de données.
-     */
     public function destroyAdmin($id)
     {
+        // On récupère les infos avant la suppression pour avoir un Log d'audit propre
+        $user = Utilisateur::find($id);
+        $nomComplet = $user ? "{$user->nom} {$user->prenom}" : "ID: {$id}";
+
         Utilisateur::where('id', $id)->delete();
+
+        // 📝 Log précis pour la suppression d'un Admin
+        $this->logAction('SUPPRESSION_ADMIN', "L'administrateur a supprimé le compte de l'administrateur : {$nomComplet}.", 'ADMIN');
+
         return redirect()->route('admin.administrateurs.index')->with('success', 'Administrateur supprimé avec succès !');
     }
 
@@ -65,18 +67,12 @@ class UtilisateurController extends Controller
      * =========================================================================
      */
 
-    /**
-     * Afficher la liste de tous les livreurs.
-     */
     public function indexLivreur()
     {
         $livreursList = Utilisateur::where('role', 'livreur')->get();
         return view('admin.livreurs.index', compact('livreursList'));
     }
 
-    /**
-     * Enregistrer un nouveau livreur dans la base de données.
-     */
     public function storeLivreur(Request $request)
     {
         $request->validate([
@@ -87,7 +83,7 @@ class UtilisateurController extends Controller
             'telephone' => 'nullable|string',
         ]);
 
-        Utilisateur::create([
+        $livreurUser = Utilisateur::create([
             'nom' => $request->nom,
             'prenom' => $request->prenom,
             'email' => $request->email,
@@ -97,15 +93,23 @@ class UtilisateurController extends Controller
             'statut' => true
         ]);
 
+        // 📝 Log précis pour la création d'un Livreur
+        $this->logAction('CREATION_LIVREUR', "L'administrateur a créé un nouveau compte livreur : {$livreurUser->nom} {$livreurUser->prenom}.", 'LIVREUR');
+
         return redirect()->route('admin.livreurs.index')->with('success', 'Livreur ajouté avec succès !');
     }
 
-    /**
-     * Supprimer un livreur spécifique de la base de données.
-     */
     public function destroyLivreur($id)
     {
+        // On récupère les infos avant la suppression pour le Log
+        $user = Utilisateur::find($id);
+        $nomComplet = $user ? "{$user->nom} {$user->prenom}" : "ID: {$id}";
+
         Utilisateur::where('id', $id)->delete();
+
+        // 📝 Log précis pour la suppression d'un Livreur (Fini le mot générique 'UTILISATEUR')
+        $this->logAction('SUPPRESSION_LIVREUR', "L'administrateur a supprimé le compte du livreur : {$nomComplet}.", 'LIVREUR');
+
         return redirect()->route('admin.livreurs.index')->with('success', 'Livreur supprimé avec succès !');
     }
 
@@ -115,18 +119,12 @@ class UtilisateurController extends Controller
      * =========================================================================
      */
 
-    /**
-     * Afficher la liste de tous les e-commerçants.
-     */
     public function indexEcom()
     {
         $ecommercantsList = Utilisateur::where('role', 'ecommercant')->get();
         return view('admin.ecommercants.index', compact('ecommercantsList'));
     }
 
-    /**
-     * Enregistrer un nouveau e-commerçant et lui créer automatiquement un portefeuille (Wallet).
-     */
     public function storeEcom(Request $request)
     {
         $request->validate([
@@ -147,48 +145,28 @@ class UtilisateurController extends Controller
             'statut' => true
         ]);
 
-        // Création automatique du Wallet pour le e-commerçant créé par l'admin
         Wallet::create([
             'ecommercant_id' => $utilisateur->id,
             'solde' => 0.00
         ]);
 
+        // 📝 Log précis pour la création d'un E-commerçant
+        $this->logAction('CREATION_ECOMMERCANT', "L'administrateur a créé un nouveau compte e-commerçant : {$utilisateur->nom} {$utilisateur->prenom} avec un portefeuille virtuel.", 'ECOMMERCANT');
+
         return redirect()->route('admin.ecommercants.index')->with('success', 'E-commerçant ajouté avec succès !');
     }
 
-    /**
-     * Supprimer un e-commerçant spécifique de la base de données.
-     */
     public function destroyEcom($id)
     {
+        // On récupère les infos avant la suppression pour le Log
+        $user = Utilisateur::find($id);
+        $nomComplet = $user ? "{$user->nom} {$user->prenom}" : "ID: {$id}";
+
         Utilisateur::where('id', $id)->delete();
+
+        // 📝 Log précis pour la suppression d'un E-commerçant
+        $this->logAction('SUPPRESSION_ECOMMERCANT', "L'administrateur a supprimé le compte de l'e-commerçant : {$nomComplet}.", 'ECOMMERCANT');
+
         return redirect()->route('admin.ecommercants.index')->with('success', 'E-commerçant supprimé avec succès !');
-    }
-
-    /**
-     * =========================================================================
-     * 📊 ANCIENNES METHODES API (Conservées pour la compatibilité)
-     * =========================================================================
-     */
-
-    /**
-     * Afficher les statistiques générales pour le tableau de bord de l'administration via API.
-     */
-    public function getDashboardStats()
-    {
-        return response()->json([
-            'total_utilisateurs' => Utilisateur::count(),
-            'total_colis' => Colis::count(),
-            'colis_livres' => Colis::where('statut', 'livre')->count(),
-            'colis_en_cours' => Colis::where('statut', 'en_cours')->count(),
-        ]);
-    }
-
-    /**
-     * Afficher l'historique global du système (Audit Logs) via API.
-     */
-    public function getAuditLogs()
-    {
-        return response()->json(AuditLog::with('utilisateur')->latest()->get());
     }
 }

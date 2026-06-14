@@ -19,47 +19,57 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-xs">
-                    {{-- كيقرا المتغير المظبوط $auditLogs --}}
                     @forelse($auditLogs ?? [] as $log)
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="p-4 font-medium text-slate-500">
                                 {{ \Carbon\Carbon::parse($log->created_at)->format('d/m/Y H:i:s') }}
                             </td>
+                            
                             <td class="p-4 font-semibold text-slate-800">
-                                {{ $log->utilisateur ?? 'Système' }}
-                            </td>
+    @if(isset($log->utilisateur_id) && $log->utilisateur_id)
+        @php
+            $userObj = \App\Models\Utilisateur::find($log->utilisateur_id);
+        @endphp
+        
+        @if($userObj)
+            {{ $userObj->nom }} {{ $userObj->prenom }}
+        @else
+            Système
+        @endif
+    @else
+        Système
+    @endif
+</td>        
+                            
                             <td class="p-4">
                                 <span class="font-medium text-slate-700">{{ $log->action }}</span>
                             </td>
+                            
                             <td class="p-4 text-slate-500 max-w-xs truncate">
-                                {{ $log->details ?? 'Aucun détail supplémentaire' }}
-                            </td>
+                                {{ $log->description ?? 'Aucun détail supplémentaire' }} </td>
+                            
                             <td class="p-4 text-center">
-                                @if(str_contains(strtolower($log->action), 'supprim') || str_contains(strtolower($log->action), 'delet'))
+                                @if($log->entite == 'LIVREUR')
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100">LIVREUR</span>
+                                @elseif($log->entite == 'ECOMMERCANT')
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100">E-COM</span>
+                                @elseif($log->entite == 'ADMIN')
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-100">ADMIN</span>
+                                @elseif(str_contains(strtolower($log->action), 'supprim') || str_contains(strtolower($log->action), 'delet'))
                                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100">DELETE</span>
-                                @elseif(str_contains(strtolower($log->action), 'modif') || str_contains(strtolower($log->action), 'updat'))
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100">UPDATE</span>
-                                @elseif(str_contains(strtolower($log->action), 'affect') || str_contains(strtolower($log->action), 'crea') || str_contains(strtolower($log->action), 'ajout'))
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-600 border border-green-100">CREATE</span>
                                 @else
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-100">INFO</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-100">{{ $log->entite ?? 'INFO' }}</span>
                                 @endif
                             </td>
                         </tr>
                     @empty
+                //Message à afficher si aucun log n'est disponible
                         <tr class="hover:bg-slate-50/80 transition">
-                            <td class="p-4 text-slate-500">02/06/2026 11:30:15</td>
-                            <td class="p-4 font-semibold text-slate-800">Admin_Sanaa</td>
-                            <td class="p-4 font-medium text-slate-700">Affectation Colis</td>
-                            <td class="p-4 text-slate-500">Colis #MC-9874 affecté au livreur Hamza</td>
-                            <td class="p-4 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-600 border border-green-100">CREATE</span></td>
-                        </tr>
-                        <tr class="hover:bg-slate-50/80 transition">
-                            <td class="p-4 text-slate-500">02/06/2026 10:15:22</td>
-                            <td class="p-4 font-semibold text-slate-800">Livreur_Hamza</td>
-                            <td class="p-4 font-medium text-slate-700">Statut Colis Modifié</td>
-                            <td class="p-4 text-slate-500">Statut du colis #MC-9874 changé à "En cours"</td>
-                            <td class="p-4 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100">UPDATE</span></td>
+                            <td class="p-4 text-slate-500">14/06/2026 23:14:11</td>
+                            <td class="p-4 font-semibold text-slate-800">Sanaa Admin</td>
+                            <td class="p-4 font-medium text-slate-700">SUPPRESSION_LIVREUR</td>
+                            <td class="p-4 text-slate-500">L'administrateur a supprimé le compte du livreur : Ahmed Alami</td>
+                            <td class="p-4 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100">LIVREUR</span></td>
                         </tr>
                     @endforelse
                 </tbody>

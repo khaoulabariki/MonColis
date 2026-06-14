@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Avis;
 use App\Models\Colis;
 use Illuminate\Http\Request;
-
+use App\Models\AuditLog;
 class AvisController extends Controller
 {
     /**
@@ -55,7 +55,15 @@ class AvisController extends Controller
             'commentaire' => $request->commentaire,
             'sentiment'   => $sentiment // Sauvegarde du résultat de l'analyse sentimentale
         ]);
-
+        
+        // Simulation du Log système : On attribue l'action au système global ou au colis concerné
+        AuditLog::create([
+         'utilisateur_id' => $colis->ecommercant_id, // Lié à l'éco-commerçant propriétaire du colis pour le suivi
+         'action'         => 'ANALYSE_IA',
+         'description'    => "L'IA a analysé un nouvel avis pour le colis {$colis->code_suivi}. Sentiment détecté : " . strtoupper($sentiment),
+         'entite'        => 'SYSTÈME',
+         'created_at'     => now()
+      ]);
         // 6. Redirection avec un message flash de succès pour le design de l'interface
         return redirect()->back()->with('success', 'Votre avis a été enregistré et analysé avec succès par notre IA !');
     }

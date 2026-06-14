@@ -47,6 +47,8 @@ class AuthController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['message' => 'Identifiants incorrects'], 401);
             }
+            //pour l'audit log, on enregistre la tentative de connexion échouée
+            $this->logAction('CONNEXION', "L'utilisateur {$utilisateur->nom} {$utilisateur->prenom} (Rôle: {$utilisateur->role}) s'est connecté au système.");
             return redirect()->back()->withErrors(['email' => 'Identifiants incorrects'])->withInput();
         }
 
@@ -120,6 +122,8 @@ class AuthController extends Controller
                 'ecommercant_id' => $utilisateur->id,
                 'solde' => 0.00
             ]);
+            // Audit Log : Enregistrement de l'action d'inscription autonome
+            $this->logAction('INSCRIPTION', "Un nouveau compte a été créé de manière autonome pour {$utilisateur->nom} {$utilisateur->prenom} en tant que {$utilisateur->role}.");
         }
 
         // Si la requête provient d'une API mobile (attend du JSON)
@@ -149,7 +153,7 @@ class AuthController extends Controller
     {
         // Déconnexion globale de la session sur le guard web
         Auth::guard('web')->logout();
-
+        $this->logAction('DECONNEXION', "L'utilisateur s'est déconnecté proprement du système.");
         // Invalidation complète et nettoyage des jetons de session
         $request->session()->invalidate();
         $request->session()->regenerateToken();
