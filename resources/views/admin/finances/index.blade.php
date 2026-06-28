@@ -2,143 +2,120 @@
 
 @section('content')
 <div class="container-fluid my-6">
-    <div class="mb-6">
-        <h2 class="text-2xl font-bold text-slate-800"><i class="fas fa-wallet text-indigo-500 mr-2"></i>Suivi des Finances (Admin)</h2>
-        <p class="text-sm text-slate-500">Visualisez le chiffre d'affaires, les gains de la plateforme, traitez les retraits et le détail par e-commerçant.</p>
+    
+    {{-- 📋 1️⃣ En-tête de la page --}}
+    <div class="mb-8">
+        <span class="text-[10px] font-black text-[#0A4BB3] uppercase tracking-widest block mb-1">Trésorerie & Distribution</span>
+        <h2 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <i class="fas fa-wallet text-[#0A4BB3]"></i> Suivi des Finances
+        </h2>
+        <p class="text-sm text-slate-400 font-medium mt-0.5">Vue globale sur la trésorerie, traitement des retraits et situation des livreurs.</p>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden mb-8">
-        <div class="p-6 border-b border-slate-100 bg-amber-50/40">
-            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-                <i class="fas fa-clock text-amber-500"></i> Demandes de Retrait en Attente
-            </h3>
-            <p class="text-xs text-slate-400 mt-1">Validez ou rejetez les demandes de virement des e-commerçants</p>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-sm text-slate-600">
-                <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[11px]">
-                    <tr>
-                        <th class="p-4">ID</th>
-                        <th class="p-4">E-commerçant</th>
-                        <th class="p-4">Montant Demandé</th>
-                        <th class="p-4">Date de Demande</th>
-                        <th class="p-4 text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse($retraitsAttente as $retrait)
-                        <tr class="hover:bg-amber-50/10 transition">
-                            <td class="p-4 font-bold text-slate-700">#{{ $retrait->id }}</td>
-                            <td class="p-4 font-medium text-slate-800">
-                                @php
-                                    $ecommercant = \App\Models\Utilisateur::find($retrait->ecommercant_id);
-                                @endphp
-                                <i class="fas fa-store text-slate-400 mr-2"></i>{{ $ecommercant->nom ?? 'Marchand' }} {{ $ecommercant->prenom ?? '' }}
-                            </td>
-                            <td class="p-4 font-bold text-indigo-600 text-base">{{ number_format($retrait->montant, 2) }} DH</td>
-                            <td class="p-4 text-slate-500 text-xs">{{ $retrait->created_at->format('d/m/Y H:i') }}</td>
-                            <td class="p-4 text-center space-x-2">
-                                
-                                <form action="{{ route('admin.finances.valider', $retrait->id) }}" method="POST" class="inline-block m-0">
-                                    @csrf
-                                    <input type="hidden" name="statut" value="valide">
-                                    <button type="submit" class="bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-600 transition cursor-pointer shadow-sm">
-                                        <i class="fas fa-check mr-1"></i> Valider
-                                    </button>
-                                </form>
-
-                                <form action="{{ route('admin.finances.valider', $retrait->id) }}" method="POST" class="inline-block m-0">
-                                    @csrf
-                                    <input type="hidden" name="statut" value="rejete">
-                                    <button type="submit" class="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 transition cursor-pointer shadow-sm">
-                                        <i class="fas fa-times mr-1"></i> Rejeter
-                                    </button>
-                                </form>
-
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="p-8 text-center text-slate-400 text-xs">
-                                <i class="fas fa-check-circle text-emerald-400 text-lg mb-1 block"></i>
-                                Aucune demande de retrait en attente pour le moment.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
+    {{-- 📊 2️⃣ LES SOLDES ET STATISTIQUES --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Collecté (Cash)</span>
-                <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="fas fa-money-bill-wave"></i></div>
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Collecté (Cash Global)</span>
+                <h3 class="text-2xl font-black text-slate-900 tracking-tight">
+                    {{ number_format(\App\Models\Colis::where('statut', 'livre')->sum('prix'), 2) }} <span class="text-sm font-bold text-slate-400">DH</span>
+                </h3>
+                <p class="text-[10px] font-medium text-slate-400 mt-1">Total du cash généré sur la plateforme</p>
             </div>
-            <h3 class="text-2xl font-bold text-slate-800">
-                {{ number_format(\App\Models\Colis::where('statut', 'livre')->sum('prix'), 2) }} DH
-            </h3>
-            <p class="text-[10px] text-slate-400 mt-1">Total du cash actuellement chez les livreurs</p>
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#0A4BB3] flex items-center justify-center text-lg shadow-sm">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Gains Plateforme (Les Frais)</span>
-                <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fas fa-chart-line"></i></div>
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Gains Plateforme (Les Frais)</span>
+                <h3 class="text-2xl font-black text-emerald-600 tracking-tight">
+                    {{ number_format(\App\Models\Colis::where('statut', 'livre')->count() * 50, 2) }} <span class="text-sm font-bold text-emerald-400">DH</span>
+                </h3>
+                <p class="text-[10px] font-medium text-emerald-500 mt-1">Calculé sur la base de 50 DH fixes par livraison</p>
             </div>
-            <h3 class="text-2xl font-bold text-slate-800">
-                {{ number_format(\App\Models\Colis::where('statut', 'livre')->count() * 50, 2) }} DH
-            </h3>
-            <p class="text-[10px] text-emerald-600 mt-1">Calculé sur la base de 50 DH de frais par livraison</p>
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shadow-sm">
+                <i class="fas fa-chart-line"></i>
+            </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Solde E-commerçants</span>
-                <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center"><i class="fas fa-hand-holding-usd"></i></div>
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Solde E-commerçants</span>
+                <h3 class="text-2xl font-black text-amber-600 tracking-tight">
+                    {{ number_format(\App\Models\Wallet::whereNotNull('ecommercant_id')->sum('solde'), 2) }} <span class="text-sm font-bold text-amber-400">DH</span>
+                </h3>
+                <p class="text-[10px] font-medium text-slate-400 mt-1">Total des fonds dus aux marchands</p>
             </div>
-            <h3 class="text-2xl font-bold text-slate-800">
-                {{ number_format(\App\Models\Wallet::whereNotNull('ecommercant_id')->sum('solde'), 2) }} DH
-            </h3>
-            <p class="text-[10px] text-slate-400 mt-1">Total des fonds globaux dus aux e-commerçants</p>
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shadow-sm">
+                <i class="fas fa-hand-holding-usd"></i>
+            </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden mb-8">
-        <div class="p-6 border-b border-slate-100 bg-amber-50/30">
-            <h3 class="font-bold text-slate-800 text-base"><i class="fas fa-users text-amber-500 mr-2"></i>Détail des Soldes par E-commerçant</h3>
-            <p class="text-xs text-slate-400 mt-1">Consultez le portefeuille nominatif de chaque vendeur</p>
+    {{-- ⚠️ 3️⃣ LES DEMANDES DE RETRAIT --}}
+    <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-100/40 overflow-hidden mb-8">
+        <div class="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/50">
+            <span class="text-[10px] font-black text-amber-600 uppercase tracking-widest block mb-1">Flux de Virement</span>
+            <h3 class="font-black text-slate-900 text-xl tracking-tight flex items-center gap-2">
+                <i class="fas fa-clock text-amber-500"></i> Demandes de Retrait en Attente
+            </h3>
+            <p class="text-xs font-medium text-slate-400 mt-0.5">Validez ou rejetez les demandes de virement des e-commerçants</p>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-sm text-slate-600">
-                <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[11px]">
+                <thead class="bg-slate-50/40 text-slate-400 font-black uppercase text-[10px] tracking-widest border-b border-slate-100">
                     <tr>
-                        <th class="p-4">Nom de l'E-commerçant</th>
-                        <th class="p-4">Email</th>
-                        <th class="p-4">Téléphone</th>
-                        <th class="p-4 text-right">Solde Actuel (Portefeuille)</th>
+                        <th class="py-5 px-6">ID</th>
+                        <th class="py-5 px-6">E-commerçant</th>
+                        <th class="py-5 px-6">Montant Demandé</th>
+                        <th class="py-5 px-6">Date de Demande</th>
+                        <th class="py-5 px-6 text-center">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse(\App\Models\Utilisateur::where('role', 'ecommercant')->get() as $ecom)
-                        <tr class="hover:bg-slate-50/50 transition">
-                            <td class="p-4 font-semibold text-slate-700">
-                                <i class="fas fa-user-circle text-slate-400 mr-2"></i>{{ $ecom->nom }} {{ $ecom->prenom }}
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    @forelse($retraitsAttente as $retrait)
+                        @php 
+                            $ecommercant = \App\Models\Utilisateur::find($retrait->ecommercant_id); 
+                        @endphp
+                        <tr class="hover:bg-amber-50/10 transition">
+                            <td class="py-5 px-6 font-mono font-black text-slate-400 text-xs">#{{ $retrait->id }}</td>
+                            <td class="py-5 px-6 font-bold text-slate-800">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
+                                        <i class="fas fa-store"></i>
+                                    </div>
+                                    {{ $ecommercant->nom ?? 'Marchand' }} {{ $ecommercant->prenom ?? '' }}
+                                </div>
                             </td>
-                            <td class="p-4 text-slate-500 text-xs">{{ $ecom->email }}</td>
-                            <td class="p-4 text-slate-500 text-xs">{{ $ecom->telephone ?? 'Non renseigné' }}</td>
-                            <td class="p-4 font-bold text-amber-600 text-right text-base">
-                                @php
-                                    $userWallet = \App\Models\Wallet::where('ecommercant_id', $ecom->id)->first();
-                                @endphp
-                                {{ number_format($userWallet->solde ?? 0, 2) }} DH
+                            <td class="py-5 px-6 font-black text-[#0A4BB3] text-base">{{ number_format($retrait->montant, 2) }} DH</td>
+                            <td class="py-5 px-6 text-slate-400 text-xs font-mono">{{ $retrait->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="py-5 px-6 text-center">
+                                <div class="flex justify-center items-center gap-2.5">
+                                    <form action="{{ route('admin.finances.valider', $retrait->id) }}" method="POST" class="inline-block m-0">
+                                        @csrf
+                                        <input type="hidden" name="statut" value="valide">
+                                        <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer shadow-md border-0">
+                                            <i class="fas fa-check mr-1.5 text-[10px]"></i> Valider
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('admin.finances.valider', $retrait->id) }}" method="POST" class="inline-block m-0">
+                                        @csrf
+                                        <input type="hidden" name="statut" value="rejete">
+                                        <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer shadow-md border-0">
+                                            <i class="fas fa-times mr-1.5 text-[10px]"></i> Rejeter
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="p-8 text-center text-slate-400 text-xs">Aucun e-commerçant trouvé dans le système.</td>
+                            <td colspan="5" class="p-10 text-center text-slate-400 font-bold">
+                                <i class="fas fa-check-circle text-emerald-500 text-2xl block mb-2"></i> Aucune demande de retrait en attente.
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -146,47 +123,90 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="p-6 border-b border-slate-100">
-            <h3 class="font-bold text-slate-800 text-lg">Détails des Colis Livrés (Données Réelles)</h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-sm text-slate-600">
-                <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[11px]">
-                    <tr>
-                        <th class="p-4">Code Colis</th>
-                        <th class="p-4">E-commerçant</th>
-                        <th class="p-4">Prix du Colis</th>
-                        <th class="p-4">Frais Livraison</th>
-                        <th class="p-4">Statut</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse(\App\Models\Colis::where('statut', 'livre')->orderBy('updated_at', 'desc')->get() as $colisReal)
-                        <tr class="hover:bg-slate-50/80 transition">
-                            <td class="p-4 font-semibold text-indigo-600">#{{ $colisReal->code_suivi }}</td>
-                            <td class="p-4 font-medium text-slate-700">
-                                @php
-                                    $owner = \App\Models\Utilisateur::find($colisReal->ecommercant_id);
-                                @endphp
-                                @if($owner)
-                                    {{ $owner->nom }} {{ $owner->prenom }}
-                                @else
-                                    <span class="text-xs text-slate-400 italic">Non spécifié</span>
-                                @endif
-                            </td>
-                            <td class="p-4 font-bold text-slate-800">{{ number_format($colisReal->prix, 2) }} DH</td>
-                            <td class="p-4 text-rose-500 font-medium">-50.00 DH</td>
-                            <td class="p-4"><span class="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-800">Livré</span></td>
-                        </tr>
-                    @empty
+    {{-- 👥 4️⃣ SOLDES DES E-COMMERÇANTS ET CASH DES LIVREURS --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xs overflow-hidden">
+            <div class="p-6 border-b border-slate-100">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Portefeuilles Marchands</span>
+                <h3 class="font-black text-slate-900 text-lg tracking-tight"><i class="fas fa-users text-[#0A4BB3] mr-1.5"></i>Soldes par E-commerçant</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs text-slate-600">
+                    <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[9px] tracking-widest border-b border-slate-100">
                         <tr>
-                            <td colspan="5" class="p-8 text-center text-slate-400 text-xs">Aucun colis marqué comme "Livré" pour le moment.</td>
+                            <th class="py-4 px-5">E-commerçant</th>
+                            <th class="py-4 px-5 text-right">Solde Actuel</th>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 font-medium">
+                        @forelse(\App\Models\Utilisateur::where('role', 'ecommercant')->get() as $ecom)
+                            @php 
+                                $userWallet = \App\Models\Wallet::where('ecommercant_id', $ecom->id)->first(); 
+                            @endphp
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-4 px-5 font-bold text-slate-800 flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-md bg-blue-50 text-[#0A4BB3] flex items-center justify-center text-[10px]">
+                                        <i class="fas fa-store"></i>
+                                    </div>
+                                    {{ $ecom->nom }} {{ $ecom->prenom }}
+                                </td>
+                                <td class="py-4 px-5 font-black text-slate-900 text-right">
+                                    <span class="bg-slate-100 px-2.5 py-1 rounded-lg font-mono">
+                                        {{ number_format($userWallet->solde ?? 0, 2) }} DH
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="2" class="p-6 text-center text-slate-400">Aucun e-commerçant.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xs overflow-hidden">
+            <div class="p-6 border-b border-slate-100">
+                <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest block mb-1">Fonds sur le terrain</span>
+                <h3 class="font-black text-slate-900 text-lg tracking-tight"><i class="fas fa-truck text-rose-500 mr-1.5"></i>Cash en poche par Livreur</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs text-slate-600">
+                    <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[9px] tracking-widest border-b border-slate-100">
+                        <tr>
+                            <th class="py-4 px-5">Livreur</th>
+                            <th class="py-4 px-5 text-right">Cash en jibe</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 font-medium">
+                        @forelse(\App\Models\Utilisateur::where('role', 'livreur')->get() as $livreur)
+                            @php
+                                $cashEnPoche = \App\Models\Colis::where('livreur_id', $livreur->id)
+                                                               ->where('statut', 'livre')
+                                                               ->sum('prix');
+                            @endphp
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-4 px-5 font-bold text-slate-800 flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-md bg-rose-50 text-rose-600 flex items-center justify-center text-[10px]">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    {{ $livreur->nom }} {{ $livreur->prenom }}
+                                </td>
+                                <td class="py-4 px-5 font-black text-rose-600 text-right">
+                                    <span class="bg-rose-50 text-rose-700 px-2.5 py-1 rounded-lg font-mono">
+                                        {{ number_format($cashEnPoche, 2) }} DH
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="2" class="p-6 text-center text-slate-400">Aucun livreur trouvé.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
+
 </div>
 @endsection

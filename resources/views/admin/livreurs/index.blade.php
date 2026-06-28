@@ -1,115 +1,130 @@
-@extends('layouts.app') {{-- Structure globale intacte --}}
+@extends('layouts.app')
 
 @section('content')
 <div class="container-fluid my-6">
-    
-    {{-- Affichage des messages de succès ou d'erreur --}}
+
     @if(session('success'))
-        <div class="mb-4 p-4 bg-green-500/10 text-green-500 border border-green-500/20 rounded-lg text-sm font-medium">
-            <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+        <div class="bg-emerald-50 border border-emerald-200/60 text-emerald-700 px-4 py-3 rounded-2xl mb-6 text-sm flex items-center gap-2 font-medium">
+            <i class="fas fa-check-circle text-emerald-500"></i> {{ session('success') }}
         </div>
     @endif
 
-    @if($errors->any())
-        <div class="mb-4 p-4 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg text-sm font-medium">
-            <i class="fas fa-exclamation-circle mr-2"></i> Erreur lors de l'enregistrement. Vérifiez les informations.
+    @if ($errors->any())
+        <div class="bg-rose-50 border border-rose-200/60 text-rose-700 px-4 py-3 rounded-2xl mb-6 text-sm font-medium">
+            <ul class="list-disc pl-5 space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
-    
-    {{-- En-tête de la page --}}
-    <div class="mb-6 flex justify-between items-center">
-        <div>
-            <h2 class="text-2xl font-bold text-slate-800"><i class="fas fa-truck text-indigo-500 mr-2"></i>Gestion des Livreurs</h2>
-            <p class="text-sm text-slate-500">Gérez les comptes des livreurs et suivez leurs informations personnelles.</p>
-        </div>
-    </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div id="addLivreurForm" class="hidden bg-white rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-100/50 p-8 mb-8 transition-all">
+        <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+            <div>
+                <h3 class="text-xl font-black text-slate-900 tracking-tight">
+                    <i class="fas fa-user-plus text-[#0A4BB3] mr-2"></i>Nouveau Livreur
+                </h3>
+                <p class="text-xs font-medium text-slate-400 mt-0.5">Créez un nouveau profil de livreur pour la plateforme.</p>
+            </div>
+            <button onclick="toggleForm()" class="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center border-0 cursor-pointer text-lg transition">&times;</button>
+        </div>
         
-        {{-- 1️⃣ FORMULAIRE D'AJOUT D'UN NOUVEAU LIVREUR --}}
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-fit">
-            <h3 class="font-bold text-slate-800 text-lg mb-4"><i class="fas fa-user-plus text-indigo-500 mr-2"></i>Ajouter un Livreur</h3>
-            
-            <form action="{{ route('admin.livreurs.store') }}" method="POST" class="space-y-4">
-                @csrf
-                
+        <form action="{{ route('admin.livreurs.store') }}" method="POST" class="space-y-6 m-0 p-0">
+            @csrf
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nom</label>
-                    <input type="text" name="nom" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nom</label>
+                    <input type="text" name="nom" required class="w-full px-4 py-3 border border-slate-200 focus:border-[#0A4BB3] rounded-xl text-sm font-medium text-slate-800 focus:outline-none transition">
                 </div>
-
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Prénom</label>
-                    <input type="text" name="prenom" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Prénom</label>
+                    <input type="text" name="prenom" required class="w-full px-4 py-3 border border-slate-200 focus:border-[#0A4BB3] rounded-xl text-sm font-medium text-slate-800 focus:outline-none transition">
                 </div>
-
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Email / Identifiant</label>
-                    <input type="email" name="email" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Adresse Email</label>
+                    <input type="email" name="email" required class="w-full px-4 py-3 border border-slate-200 focus:border-[#0A4BB3] rounded-xl text-sm font-mono text-slate-800 focus:outline-none transition">
                 </div>
-
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Mot de passe</label>
-                    <input type="password" name="password" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Téléphone</label>
+                    <input type="text" name="telephone" class="w-full px-4 py-3 border border-slate-200 focus:border-[#0A4BB3] rounded-xl text-sm font-medium text-slate-800 focus:outline-none transition">
                 </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Téléphone</label>
-                    <input type="text" name="telephone" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                <div class="md:col-span-2">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Mot de passe</label>
+                    <input type="password" name="password" required class="w-full px-4 py-3 border border-slate-200 focus:border-[#0A4BB3] rounded-xl text-sm font-medium text-slate-800 focus:outline-none transition">
                 </div>
-
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg text-sm transition shadow-sm">
-                    Enregistrer le livreur
-                </button>
-            </form>
-        </div>
-
-        {{-- 2️⃣ TABLEAU DE LA LISTE DES LIVREURS EXISTANTS --}}
-        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-            <div class="p-6 border-b border-slate-100">
-                <h3 class="font-bold text-slate-800 text-lg">Liste des Livreurs</h3>
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-slate-50">
+                <button type="button" onclick="toggleForm()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition cursor-pointer">Annuler</button>
+                <button type="submit" class="bg-[#0A4BB3] hover:bg-[#083da3] text-white font-black text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition shadow-lg shadow-blue-900/10 cursor-pointer">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+        
+    <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xs overflow-hidden">
+        
+        <div class="p-6 sm:p-8 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Logistique & Distribution</span>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Liste des Livreurs</h2>
+                <p class="text-slate-400 text-xs mt-0.5 font-medium">Gerez les accès et les profils des livreurs de la plateforme.</p>
             </div>
             
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm text-slate-600">
-                    <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[11px] tracking-wider border-b border-slate-100">
-                        <tr>
-                            <th class="p-4">ID</th>
-                            <th class="p-4">Nom Complet</th>
-                            <th class="p-4">Email</th>
-                            <th class="p-4 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        {{-- CORRECTION ICI : Utilisation de $livreursList au lieu de $livreurs --}}
-                        @forelse($livreursList ?? [] as $livreur)
-                            <tr class="hover:bg-slate-50/80 transition">
-                                <td class="p-4 font-mono text-slate-400">#{{ $livreur->id }}</td>
-                                <td class="p-4 font-medium text-slate-800">{{ $livreur->nom }} {{ $livreur->prenom }}</td>
-                                <td class="p-4">{{ $livreur->email }}</td>
-                                <td class="p-4 text-center flex justify-center items-center gap-3">
-                                    
-                                    {{-- Formulaire sécurisé pour supprimer un livreur --}}
-                                    <form action="{{ route('admin.livreurs.destroy', $livreur->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce livreur ?');" class="inline m-0 p-0">
+            <button onclick="toggleForm()" class="bg-[#0A4BB3] hover:bg-[#083da3] text-white font-black text-xs uppercase tracking-widest px-5 py-3 rounded-2xl transition shadow-lg shadow-blue-900/10 flex items-center gap-2.5 cursor-pointer">
+                <i class="fas fa-user-plus text-[11px]"></i> Ajouter un Livreur
+            </button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm text-slate-600">
+                <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[10px] tracking-widest border-b border-slate-100">
+                    <tr>
+                        <th class="py-5 px-6">ID</th>
+                        <th class="py-5 px-6">Nom & Prénom</th>
+                        <th class="py-5 px-6">Adresse Email</th>
+                        <th class="py-5 px-6 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    @forelse($livreursList ?? [] as $livreur)
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-5 px-6 font-mono font-bold text-slate-400 text-xs">#{{ $livreur->id }}</td>
+                            <td class="py-5 px-6 font-bold text-slate-800 flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#0A4BB3] flex items-center justify-center text-xs">
+                                    <i class="fas fa-truck"></i>
+                                </div>
+                                {{ $livreur->nom }} {{ $livreur->prenom }}
+                            </td>
+                            <td class="py-5 px-6 font-mono text-xs text-slate-500">{{ $livreur->email }}</td>
+                            <td class="py-5 px-6 text-center">
+                                <div class="flex justify-center items-center">
+                                    <form action="{{ route('admin.livreurs.destroy', $livreur->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce livreur ?');" class="inline m-0 p-0">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-slate-400 hover:text-red-600 transition bg-transparent border-0 p-0 cursor-pointer align-middle">
+                                        <button type="submit" class="text-slate-400 hover:text-rose-600 transition bg-transparent border-0 p-0 cursor-pointer align-middle text-base">
                                             <i class="fas fa-trash-alt" title="Supprimer"></i>
                                         </button>
                                     </form>
-
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="p-8 text-center text-slate-400">Aucun livreur trouvé dans le système.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="p-10 text-center text-slate-400 font-bold">
+                                <i class="fas fa-users-slash text-2xl block mb-2 text-slate-300"></i> Aucun livreur trouvé dans la base de données.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-
     </div>
 </div>
+
+<script>
+    function toggleForm() {
+        const form = document.getElementById('addLivreurForm');
+        form.classList.toggle('hidden');
+    }
+</script>
 @endsection

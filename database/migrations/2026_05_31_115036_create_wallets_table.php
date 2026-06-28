@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id(); // Équivalent à id_wallet (Clé primaire auto-incrémentée)
             
             // Relation avec le e-commerçant propriétaire du wallet (Clé étrangère)
-            // Modification: 'ecommercant_id' avec deux 'm' pour rester cohérent
+            
             $table->foreignId('ecommercant_id')
                   ->constrained('utilisateurs')
                   ->onDelete('cascade');

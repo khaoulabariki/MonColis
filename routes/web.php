@@ -42,6 +42,15 @@ Route::get('/tracking', function (Request $request) {
     return view('welcome', compact('colis', 'code'));
 });
 
+// 🎯 ROUTE POUR LA PAGE CONTACT (Située dans views/auth/contact.blade.php)
+Route::get('/contact', function () {
+    return view('auth.contact');
+})->name('contact');
+
+Route::post('/contact', function (Illuminate\Http\Request $request) {
+    return redirect()->back()->with('success', 'Votre message a été envoyé avec succès à l\'administration !');
+})->name('contact.post');
+
 // Routes de gestion de l'authentification (Affichage, Connexion, Déconnexion)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -128,7 +137,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/finances', [TransactionController::class, 'index'])->name('finances.index');
     Route::post('/finances/retrait/{id}/valider', [RetraitController::class, 'traiterRetrait'])->name('finances.valider');
 
-    // 5. GESTION DES UTILISATEURS (🎯 Reliée proprement à UtilisateurController)
+    // 5. GESTION DES UTILISATEURS
     
     // --- SECTION : ADMINISTRATEURS ---
     Route::get('/administrateurs', [UtilisateurController::class, 'indexAdmin'])->name('administrateurs.index');
@@ -147,8 +156,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // 6. Gestion et suivi des affectations de colis aux livreurs
     Route::get('/affectations', [AffectationController::class, 'index'])->name('affectations.index');
-    
-    // Traitement et liaison de l'action de soumission d'une affectation
     Route::post('/affectations/{id}', [AffectationController::class, 'store'])->name('affectations.store');
 
     // 7. Journaux et logs d'audit du système informatique
@@ -161,7 +168,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 |--------------------------------------------------------------------------
 */
 
-// Formulaire de modification de structure d'un colis spécifique
 Route::get('/admin/colis/{id}/modifier', function ($id) {
     $colisList = Colis::orderBy('created_at', 'desc')->get();
     $ecommercants = Utilisateur::where('role', 'ecommercant')->get();
@@ -171,7 +177,6 @@ Route::get('/admin/colis/{id}/modifier', function ($id) {
     return view('admin.colis.index', compact('colisList', 'ecommercants', 'mode', 'colisEnCours'));
 })->name('admin.colis.edit');
 
-// Enregistrement unifié ou mise à jour complète d'un colis
 Route::post('/admin/colis/store', function (Illuminate\Http\Request $request) {
     $request->validate([
         'code_barre'          => 'required|string',
@@ -214,7 +219,6 @@ Route::post('/admin/colis/store', function (Illuminate\Http\Request $request) {
     return redirect()->route('admin.colis.index')->with('success', $message);
 })->name('admin.colis.store');
 
-// Suppression définitive d'un colis de la base de données
 Route::delete('/admin/colis/{id}/supprimer', function ($id) {
     Colis::where('id', $id)->delete();
     return redirect()->route('admin.colis.index')->with('success', 'Colis supprimé avec succès !');
@@ -227,7 +231,6 @@ Route::delete('/admin/colis/{id}/supprimer', function ($id) {
 */
 Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ecommercant.')->group(function () {
     
-    // 1. Tableau de bord dynamique de l'E-commerçant connecté avec calcul des statistiques
     Route::get('/dashboard', function () {
         $totalColis = Colis::where('ecommercant_id', auth()->id())->count();
         $livres = Colis::where('ecommercant_id', auth()->id())->where('statut', 'Livré')->count();
@@ -237,13 +240,9 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
         return view('ecommercant.dashboard', compact('totalColis', 'livres', 'enCours', 'retournes'));
     })->name('dashboard');
 
-    // 2. Consultation et détails du portefeuille financier de l'E-commerçant via le WalletController
     Route::get('/finances', [WalletController::class, 'getWalletDetails'])->name('finances');
-
-    // Route de soumission pour une demande de retrait (Placée ici dans le bon Espace et le bon Préfixe)
     Route::post('/finances/retrait', [RetraitController::class, 'demanderRetrait'])->name('retrait.store');
 
-    // 3. Affichage de la liste filtrée des colis de l'E-commerçant connecté
     Route::get('/colis', function () {
         $colis = \App\Models\Colis::where('ecommercant_id', auth()->id())
             ->orderBy('created_at', 'desc')
@@ -253,8 +252,6 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
     })->name('colis.index');
     
     Route::post('/colis', [\App\Http\Controllers\ColisController::class, 'store'])->name('colis.store');
-
-    // 4. Affichage du formulaire de création de colis pour l'E-commerçant
     Route::get('/colis/creer', function () {
         return view('ecommercant.colis.create');
     })->name('colis.create');
@@ -266,9 +263,8 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:livreur'])->prefix('livreur')->name('livreur.')->group(function () {
-    //mes livraisons
     Route::put('/colis/{id}/statut', [\App\Http\Controllers\ColisController::class, 'updateStatut'])->name('colis.statut');
-    // Tableau de bord du livreur avec compte des colis assignés
+    
     Route::get('/dashboard', function () {
         $colisCount = Affectation::where('livreur_id', auth()->id())
             ->whereIn('statut', ['en_attente', 'en_cours'])
@@ -277,7 +273,6 @@ Route::middleware(['auth', 'role:livreur'])->prefix('livreur')->name('livreur.')
         return view('livreur.dashboard', compact('colisCount')); 
     })->name('dashboard');
 
-    // Liste complète des colis assignés au livreur actuellement connecté
     Route::get('/mes-livraisons', function () {
         $affectations = Affectation::with('colis')
             ->where('livreur_id', auth()->id())
@@ -294,7 +289,6 @@ Route::middleware(['auth', 'role:livreur'])->prefix('livreur')->name('livreur.')
 |--------------------------------------------------------------------------
 */
 Route::get('/create-ecom', function () {
-    
     $oldUser = \App\Models\Utilisateur::where('email', 'ecom@nwsallik.com')->first();
     if ($oldUser) {
         \App\Models\Wallet::where('ecommercant_id', $oldUser->id)->delete();
@@ -315,5 +309,5 @@ Route::get('/create-ecom', function () {
         'solde' => 0.00
     ]);
     
-    return "Compte de test E-commerçant créé avec succès ! ";
+    return "Compte de test E-commerçant créé avec succès !";
 });

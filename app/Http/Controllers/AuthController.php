@@ -47,8 +47,14 @@ class AuthController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['message' => 'Identifiants incorrects'], 401);
             }
-            //pour l'audit log, on enregistre la tentative de connexion échouée
-            $this->logAction('CONNEXION', "L'utilisateur {$utilisateur->nom} {$utilisateur->prenom} (Rôle: {$utilisateur->role}) s'est connecté au système.");
+            // Pour l'audit log, on enregistre la tentative de connexion échouée
+$nomUtilisateur = $utilisateur ? ($utilisateur->nom . ' ' . $utilisateur->prenom) : $request->email;
+
+$this->logAction(
+    'TENTATIVE_CONNEXION', 
+    "Tentative de connexion échouée avec l'email : " . $nomUtilisateur,
+    'SYSTEME'
+);
             return redirect()->back()->withErrors(['email' => 'Identifiants incorrects'])->withInput();
         }
 
