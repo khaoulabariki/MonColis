@@ -3,126 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MonColis — Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Shipily — Espace Livreur</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .text-brand-blue { color: #0A4BB3; }
+        .bg-brand-blue { background-color: #0A4BB3; }
+        .hover\:bg-brand-blue-dark:hover { background-color: #083D93; }
+        .text-brand-orange { color: #FF6B00; }
+        .bg-brand-orange { background-color: #FF6B00; }
+    </style>
 </head>
-<body class="bg-[#f8f9fa] text-gray-800 font-sans antialiased">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
     <div class="flex h-screen overflow-hidden">
         
-        <!-- Sidebar Navigation -->
-        <div class="w-64 bg-[#d9531e] flex flex-col justify-between text-white shadow-md flex-shrink-0">
+        <div class="w-64 bg-white flex flex-col justify-between text-slate-700 border-r border-slate-100 flex-shrink-0 shadow-xs">
             <div class="p-6">
-                <div class="text-2xl font-bold tracking-wide mb-10 px-2">
-                    MonColis 
+                <div class="flex items-center gap-2.5 mb-10 px-2">
+                    <div class="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center relative overflow-hidden shadow-xs">
+                        <div class="absolute inset-0 border-r-2 border-white/20 transform rotate-45 scale-150"></div>
+                        <i class="fas fa-arrow-up text-brand-orange text-xs transform rotate-45"></i>
+                    </div>
+                    <span class="text-xl font-black tracking-tight"><span class="text-brand-blue">Ship</span><span class="text-brand-orange">ily</span></span>
                 </div>
                 
                 <nav class="space-y-1">
-                    <a href="{{ route('livreur.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium bg-white/10 text-white transition-all">
-                        <i class="fas fa-home w-5 text-center"></i> Dashboard
+                    <a href="{{ route('livreur.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black bg-blue-50 text-brand-blue transition-all">
+                        <i class="fas fa-home w-5 text-center text-sm"></i> Dashboard
                     </a>
 
-                    <a href="{{ route('livreur.mes_livraisons') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 hover:text-white transition-all">
-                        <i class="fas fa-truck w-5 text-center"></i> Mes Livraisons
+                    <a href="{{ route('livreur.mes_livraisons') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-brand-blue transition-all">
+                        <i class="fas fa-truck w-5 text-center text-sm"></i> Mes Livraisons
                     </a>
                 </nav>
             </div>
 
-            <!-- User Session / Logout -->
-            <div class="p-4 border-t border-white/10 bg-black/10 flex flex-col gap-2">
-                <div class="text-xs text-white/70 px-2 truncate">
-                    👤 Livreur Connecté
+            <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col gap-2">
+                <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider px-2 truncate flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Livreur En Ligne
                 </div>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
-                    <button type="submit" class="w-full text-left flex items-center gap-2 px-2 py-1.5 text-xs font-medium text-white/80 hover:text-white rounded transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    <button type="submit" class="w-full text-left flex items-center gap-2 px-2 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors">
+                        <i class="fas fa-sign-out-alt w-4"></i>
                         Déconnexion
                     </button>
                 </form>
             </div>
         </div>
 
-        <!-- Main Content (Expanded to full width using w-full) -->
         <main class="flex-1 overflow-y-auto p-8 w-full">
-            <div class="w-full">
+            <div class="w-full max-w-7xl mx-auto">
                 
-                <h1 class="text-2xl font-semibold text-gray-700 tracking-tight mb-6">Tableau de bord</h1>
+                <div class="mb-8">
+                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">Tableau de bord</h1>
+                    <p class="text-xs font-medium text-slate-400 mt-1">Aperçu en temps réel de votre activité de livraison.</p>
+                </div>
                 
-                <!-- Statistics Section -->
-                <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm mb-8">
-                    <p class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Statistiques des colis</p>
+                <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-xs mb-8">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-5">Suivi du portefeuille & colis</p>
                     
-                    <!-- Grid Layout for the 3 Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         
-                        <!-- Card 1: Assigned Colis -->
-                        <div class="p-5 bg-orange-50 rounded-xl border border-orange-100 flex flex-col justify-between min-h-[140px]">
+                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/50 flex flex-col justify-between min-h-[140px] hover:shadow-md transition duration-200">
                             <div>
-                                <span class="text-xs font-semibold text-orange-700 uppercase tracking-wider block mb-1">Mes Colis Assignés</span>
-                                <p class="text-3xl font-extrabold text-gray-900 mt-2">
+                                <span class="text-[10px] font-black text-brand-orange uppercase tracking-wider bg-orange-50 px-2 py-0.5 rounded-md border border-orange-100/50 inline-block mb-1">Colis Assignés</span>
+                                <p class="text-3xl font-black text-slate-900 mt-2">
                                     {{ $colisCount ?? 0 }}
                                 </p>
                             </div>
-                            <span class="text-xs text-gray-500 font-normal mt-2 block">colis prêt(s) à livrer</span>
+                            <span class="text-xs text-slate-400 font-medium mt-3 block"><i class="fas fa-box mr-1"></i> Prêt(s) à être livrés</span>
                         </div>
 
-                        <!-- Card 2: Wallet / Cash in Hand -->
-                        <div class="p-5 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col justify-between min-h-[140px]">
+                        @php
+                            $totalCashEnMain = \App\Models\Colis::where('livreur_id', auth()->id())->where('statut', 'livre')->sum('prix');
+                            $totalCommissions = \App\Models\Colis::where('livreur_id', auth()->id())->where('statut', 'livre')->count() * 20;
+                            $resteADonnerAdmin = $totalCashEnMain - $totalCommissions;
+                        @endphp
+
+                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/50 flex flex-col justify-between min-h-[140px] hover:shadow-md transition duration-200">
                             <div>
-                                <span class="text-xs font-semibold text-emerald-700 uppercase tracking-wider block mb-1">Mon Portefeuille (Cash en main)</span>
-                                <p class="text-3xl font-extrabold text-gray-900 mt-2">
-                                    {{ number_format(\App\Models\Colis::where('livreur_id', auth()->id())->where('statut', 'livre')->sum('prix'), 2) }} <span class="text-lg font-bold text-gray-500">DH</span>
+                                <span class="text-[10px] font-black text-slate-600 uppercase tracking-wider bg-slate-200/60 px-2 py-0.5 rounded-md inline-block mb-1">Cash Total En Main</span>
+                                <p class="text-3xl font-black text-slate-900 mt-2">
+                                    {{ number_format($totalCashEnMain, 2) }} <span class="text-sm font-bold text-slate-400">DH</span>
                                 </p>
                             </div>
-                            <span class="text-[11px] text-emerald-600 font-medium mt-2 block"><i class="fas fa-info-circle mr-1"></i> Total du cash collecté à verser à l'administration</span>
+                            <span class="text-[11px] text-slate-500 font-bold mt-3 block"><i class="fas fa-wallet mr-1"></i> Total collecté sur le terrain</span>
                         </div>
 
-                        <!-- Card 3: Mes Gains Réels -->
-                        <div class="p-5 bg-indigo-50 rounded-xl border border-indigo-100 flex flex-col justify-between min-h-[140px]">
+                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/50 flex flex-col justify-between min-h-[140px] hover:shadow-md transition duration-200">
                             <div>
-                                <span class="text-xs font-semibold text-indigo-700 uppercase tracking-wider block mb-1">Mes Gains (Commissions)</span>
-                                <p class="text-3xl font-extrabold text-gray-900 mt-2">
-                                    {{ number_format(\App\Models\Colis::where('livreur_id', auth()->id())->where('statut', 'livre')->count() * 20, 2) }} <span class="text-lg font-bold text-gray-500">DH</span>
+                                <span class="text-[10px] font-black text-brand-blue uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 inline-block mb-1">Mes Commissions</span>
+                                <p class="text-3xl font-black text-brand-blue mt-2">
+                                    {{ number_format($totalCommissions, 2) }} <span class="text-sm font-bold text-blue-300">DH</span>
                                 </p>
                             </div>
-                            <span class="text-[11px] text-indigo-600 font-medium mt-2 block"><i class="fas fa-coins mr-1"></i> Votre gain net (20 DH par colis livré)</span>
+                            <span class="text-[11px] text-brand-blue font-bold mt-3 block"><i class="fas fa-coins mr-1"></i> Votre gain net (20 DH / colis)</span>
+                        </div>
+
+                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/50 flex flex-col justify-between min-h-[140px] hover:shadow-md border-l-4 border-l-rose-500 transition duration-200">
+                            <div>
+                                <span class="text-[10px] font-black text-rose-600 uppercase tracking-wider bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100/50 inline-block mb-1">À Verser à l'Admin</span>
+                                <p class="text-3xl font-black text-rose-600 mt-2">
+                                    {{ number_format($resteADonnerAdmin, 2) }} <span class="text-sm font-bold text-rose-300">DH</span>
+                                </p>
+                            </div>
+                            <span class="text-[11px] text-rose-500 font-bold mt-3 block"><i class="fas fa-arrow-circle-right mr-1"></i> Montant dû à l'administration</span>
                         </div>
 
                     </div>
                 </div>
 
-                <!-- New Section: Large Table for Delivered Packages History -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden w-full">
-                    <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-                        <h3 class="font-bold text-gray-800 text-lg"><i class="fas fa-history text-gray-400 mr-2"></i> Historique des colis livrés</h3>
-                        <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">Encaissé</span>
+                <div class="bg-white rounded-3xl shadow-xs border border-slate-200/60 overflow-hidden w-full">
+                    <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                        <h3 class="font-black text-slate-900 text-base flex items-center gap-2"><i class="fas fa-history text-slate-400"></i> Historique des colis livrés</h3>
+                        <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-100 font-black uppercase tracking-wider px-3 py-1 rounded-xl shadow-xs">Encaissé</span>
                     </div>
                     
                     <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left border-collapse text-sm text-gray-600">
-                            <thead class="bg-gray-50 text-gray-400 font-bold uppercase text-[11px] tracking-wider border-b border-gray-100">
+                        <table class="w-full text-left border-collapse text-sm text-slate-600">
+                            <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[10px] tracking-widest border-b border-slate-100">
                                 <tr>
-                                    <th class="p-4">Code Colis</th>
+                                    <th class="p-4 pl-6">Code Colis</th>
                                     <th class="p-4">Destinataire</th>
                                     <th class="p-4">Date de Livraison</th>
                                     <th class="p-4">Montant Collecté</th>
-                                    <th class="p-4">Ma Commission</th>
+                                    <th class="p-4 pr-6">Ma Commission</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
+                            <tbody class="divide-y divide-slate-100 text-xs font-bold">
                                 @forelse(\App\Models\Colis::where('livreur_id', auth()->id())->where('statut', 'livre')->orderBy('updated_at', 'desc')->get() as $colisLivre)
-                                    <tr class="hover:bg-gray-50/50 transition">
-                                        <td class="p-4 font-semibold text-indigo-600">{{ $colisLivre->code_suivi }}</td>
-                                        <td class="p-4 text-gray-700 font-medium">{{ $colisLivre->nom_destinataire }} {{ $colisLivre->prenom_destinataire }}</td>
-                                        <td class="p-4 text-xs text-gray-400">{{ $colisLivre->updated_at->format('d/m/Y H:i') }}</td>
-                                        <td class="p-4 font-bold text-gray-900">{{ number_format($colisLivre->prix, 2) }} DH</td>
-                                        <td class="p-4 text-emerald-600 font-bold">+ 20.00 DH</td>
+                                    <tr class="hover:bg-slate-50/40 transition">
+                                        <td class="p-4 pl-6 font-black text-brand-blue">{{ $colisLivre->code_suivi }}</td>
+                                        <td class="p-4 text-slate-700">{{ $colisLivre->nom_destinataire }} {{ $colisLivre->prenom_destinataire }}</td>
+                                        <td class="p-4 font-medium text-slate-400">{{ $colisLivre->updated_at->format('d/m/Y H:i') }}</td>
+                                        <td class="p-4 font-black text-slate-900">{{ number_format($colisLivre->prix, 2) }} DH</td>
+                                        <td class="p-4 pr-6 text-emerald-600 font-black">+ 20.00 DH</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="p-8 text-center text-gray-400 text-xs">Aucun colis marqué comme "Livré" pour le moment.</td>
+                                        <td colspan="5" class="p-8 text-center text-slate-400 text-xs font-medium">Aucun colis marqué comme "Livré" pour le moment.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -134,6 +155,7 @@
         </main>
 
     </div>
+   
 
 </body>
 </html>

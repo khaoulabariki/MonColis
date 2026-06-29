@@ -47,4 +47,9 @@ class Colis extends Model
     {
         return $this->hasMany(Avis::class, 'colis_id');
     }
+
+    public function destinataire()
+{
+    return $this->belongsTo(Destinataire::class);
+}
 }

@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // 🛠️ كنحبسو الحماية ديال المفاتيح الأجنبية مؤقتاً باش يتكرى الطابل بلا مشاكل الترتيب
+        Schema::disableForeignKeyConstraints();
+
         Schema::create('colis', function (Blueprint $table) {
             $table->id(); // Identifiant unique du colis (Clé primaire)
             $table->string('code_suivi')->unique(); // Code de suivi unique pour le tracking
@@ -33,8 +36,10 @@ return new class extends Migration
             
             $table->string('token_suivi')->unique(); // Token sécurisé unique pour le suivi public
             
+            // نظام تصفية الأموال (false = باقي ما تصفاش مع الأدمن، true = تصفى)
+            $table->boolean('encaissement_admin')->default(false);
+
             // Relation avec le e-commerçant propriétaire du colis (Clé étrangère)
-            // Modification: 'ecommercant_id' avec deux 'm' pour correspondre au rôle utilisateur
             $table->foreignId('ecommercant_id')
                   ->constrained('utilisateurs')
                   ->onDelete('cascade');
@@ -46,7 +51,12 @@ return new class extends Migration
                   ->onDelete('set null');
                   
             $table->timestamps(); // Colonnes 'created_at' et 'updated_at'
+
+            $table->foreignId('destinataire_id')->nullable()->constrained()->onDelete('set null'); // Relation avec le destinataire (Clé étrangère, peut être nulle)
         });
+
+        // 🔄 كنرجعو الحماية كيف كانت بعد ما تكرا الطابل بنجاح
+        Schema::enableForeignKeyConstraints();
     }
 
     /**

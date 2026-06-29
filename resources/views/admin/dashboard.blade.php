@@ -110,13 +110,13 @@
                 <div class="w-36 h-36 relative flex items-center justify-center shrink-0">
                     <canvas id="satisfactionChart"></canvas>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span class="text-3xl font-black text-slate-900 tracking-tighter">{{ $tauxSatisfaction ?? 72 }}%</span>
+                        <span class="text-3xl font-black text-slate-900 tracking-tighter">{{ $tauxSatisfaction ?? 0 }}%</span>
                     </div>
                 </div>
                 <div class="space-y-2.5 w-full">
-                    <div class="flex items-center justify-between text-xs font-bold text-slate-600 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#10B981]"></span> Positif</span> <span>72%</span></div>
-                    <div class="flex items-center justify-between text-xs font-bold text-slate-600 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#0A4BB3]"></span> Neutre</span> <span>18%</span></div>
-                    <div class="flex items-center justify-between text-xs font-bold text-slate-600 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100 text-rose-600"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#EF4444]"></span> Négatif</span> <span>10%</span></div>
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-600 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#10B981]"></span> Positif</span> <span>0%</span></div>
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-600 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#0A4BB3]"></span> Neutre</span> <span>0%</span></div>
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-600 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100 text-rose-600"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#EF4444]"></span> Négatif</span> <span>0%</span></div>
                 </div>
             </div>
         </div>
@@ -180,4 +180,39 @@
         });
     });
 </script>
+<div class="mt-8 bg-white rounded-3xl shadow-xs border border-slate-200/60 overflow-hidden w-full p-6 text-left">
+    <div class="mb-6">
+        <h3 class="text-sm font-black text-slate-950 uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-comments text-brand-blue"></i> Tous les Avis Clients
+        </h3>
+        <p class="text-[11px] font-medium text-slate-400 mt-0.5">Liste globale des retours d'expérience sur la plateforme.</p>
+    </div>
+
+    <div class="overflow-x-auto w-full">
+        <table class="w-full text-left border-collapse text-sm text-slate-600">
+            <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[10px] tracking-widest border-b border-slate-100">
+                <tr>
+                    <th class="p-4 pl-6">Code Colis</th>
+                    <th class="p-4">Destinataire</th>
+                    <th class="p-4">Commentaire / Avis</th>
+                    <th class="p-4 pr-6">Date</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-bold text-xs">
+                @forelse($recentAvis as $avis)
+                    <tr class="hover:bg-slate-50/30 transition">
+                        <td class="p-4 pl-6 text-brand-blue font-mono">{{ $avis->colis->code_suivi ?? 'N/A' }}</td>
+                        <td class="p-4 text-slate-900 font-black">{{ $avis->colis->prenom_destinataire ?? '' }} {{ $avis->colis->nom_destinataire ?? 'Client Anonyme' }}</td>
+                        <td class="p-4 text-slate-500 font-medium max-w-md italic">"{{ $avis->commentaire }}"</td>
+                        <td class="p-4 pr-6 text-slate-400 font-semibold">{{ $avis->created_at ? $avis->created_at->format('d/m/Y H:i') : '---' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="p-12 text-center text-slate-400 font-medium">Aucun commentaire enregistré.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 @endsection

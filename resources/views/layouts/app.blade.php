@@ -86,13 +86,18 @@
                     <a href="/ecommercant/colis" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition {{ Request::is('ecommercant/colis*') ? 'bg-brand-blue text-white shadow-md shadow-blue-900/10' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-blue' }}">
                         <i class="fas fa-boxes w-5"></i> Mes Colis
                     </a>
-                    <a href="/ecommercant/finances" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition {{ Request::is('ecommercant/finances*') ? 'bg-brand-blue text-white shadow-md shadow-blue-900/10' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-blue' }}">
+
+                    <a href="/ecommercant/destinataires" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition {{ Request::is('ecommercant/destinataires*') ? 'bg-brand-blue text-white shadow-md shadow-blue-900/10' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-blue' }}">
+                        <i class="fas fa-users w-5"></i> Mes Destinataires
+                    </a>
+
+                    <a href="/ecommercant/finances" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition {{ Request::is('ecommercant/finances*') && !request()->has('action') ? 'bg-brand-blue text-white shadow-md shadow-blue-900/10' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-blue' }}">
                         <i class="fas fa-wallet w-5"></i> Mon Wallet
                     </a>
                     
                     <a href="/ecommercant/finances?action=retrait" 
                        onclick="if(window.location.pathname.includes('finances')) { event.preventDefault(); openRetraitModal(); } toggleMobileMenu();"
-                       class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-blue transition cursor-pointer">
+                       class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition {{ request()->get('action') === 'retrait' ? 'bg-brand-blue text-white shadow-md shadow-blue-900/10' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-blue' }} cursor-pointer">
                         <i class="fas fa-hand-holding-usd w-5"></i> Demande Retrait
                     </a>
                 @endif

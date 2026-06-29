@@ -10,129 +10,75 @@ use App\Models\Avis;
 use App\Models\AuditLog;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed l'application avec des données prêtes pour la soutenance.
+     * Seed l'application avec uniquement les 3 comptes principaux demandés.
      */
     public function run(): void
     {
-        // 1. CRÉATION DES UTILISATEURS DE TEST (Pour se connecter demain)
+        // 1. Désactiver les contraintes pour vider proprement la base de données
+        Schema::disableForeignKeyConstraints();
+        AuditLog::truncate();
+        Avis::truncate();
+        Affectation::truncate();
+        Colis::truncate();
+        Wallet::truncate();
+        Utilisateur::truncate();
+        Schema::enableForeignKeyConstraints();
+
+        // 2. Mot de passe global par défaut : password
+        $passwordGlobal = Hash::make('password');
+
+        // =========================================================================
+        // 👥 1. CRÉATION DES 3 UTILISATEURS PRINCIPAUX (MODIFIÉS)
+        // =========================================================================
         
+        // 1️⃣ L'ADMINISTRATEUR (Khaoula Bariki)
         $admin = Utilisateur::create([
-            'nom' => 'Alami',
-            'prenom' => 'Ahmed',
-            'email' => 'admin@nwsallik.com',
-            'password' => Hash::make('password123'),
+            'nom' => 'Bariki',
+            'prenom' => 'Khaoula',
+            'email' => 'admin@shipily.ma',
+            'password' => $passwordGlobal,
             'role' => 'admin',
             'telephone' => '0661234567',
             'statut' => true,
         ]);
 
-        $ecommercant = Utilisateur::create([
-            'nom' => 'Benani',
-            'prenom' => 'Youssef',
-            'email' => 'ecom@nwsallik.com',
-            'password' => Hash::make('password123'),
-            'role' => 'ecommercant',
+        // 2️⃣ L'E-COMMERÇANT (Ikram Belkhaoua)
+        // الملاحظة: الـ role خليتو 'ecommercant' على حساب الـ Seeder القديم ديالك
+        $ecom = Utilisateur::create([
+            'nom' => 'Belkhaoua',
+            'prenom' => 'Ikram',
+            'email' => 'ecom@shipily.ma',
+            'password' => $passwordGlobal,
+            'role' => 'ecommercant', 
             'telephone' => '0667890123',
             'statut' => true,
         ]);
 
+        // 3️⃣ LE LIVREUR (Amine El Alami)
         $livreur = Utilisateur::create([
-            'nom' => 'Tazi',
-            'prenom' => 'Karim',
-            'email' => 'livreur@nwsallik.com',
-            'password' => Hash::make('password123'),
+            'nom' => 'El Alami',
+            'prenom' => 'Amine',
+            'email' => 'livreur@shipily.ma',
+            'password' => $passwordGlobal,
             'role' => 'livreur',
             'telephone' => '0655443322',
             'statut' => true,
         ]);
 
-        // 2. CRÉATION DU PORTEFEUILLE (WALLET) POUR L'E-COMMERÇANT
-        $wallet = Wallet::create([
-            'ecommercant_id' => $ecommercant->id,
-            'solde' => 1550.00, // Solde fictif initial pour alimenter l'interface finances
-        ]);
-
-        // 3. CRÉATION DE QUELQUES COLIS AVEC DIFFÉRENTS STATUTS (Pour le Dashboard de demain)
-        
-        // Colis 1 : Enregistré (Non encore affecté)
-        $colis1 = Colis::create([
-            'code_suivi' => 'NWS-REG12345',
-            'nom_destinataire' => 'Hakimi',
-            'prenom_destinataire' => 'Achraf',
-            'telephone_destinataire' => '0611223344',
-            'adresse_destinataire' => 'Casablanca, Maarif',
-            'poids' => 1.5,
-            'prix' => 350.00,
-            'statut' => 'enregistre',
-            'token_suivi' => (string) Str::uuid(),
-            'ecommercant_id' => $ecommercant->id,
-        ]);
-
-        // Colis 2 : En cours de livraison (Affecté au livreur)
-        $colis2 = Colis::create([
-            'code_suivi' => 'NWS-ENCOURS88',
-            'nom_destinataire' => 'Bounou',
-            'prenom_destinataire' => 'Yassine',
-            'telephone_destinataire' => '0677889900',
-            'adresse_destinataire' => 'Rabat, Agdal',
-            'poids' => 0.8,
-            'prix' => 200.00,
-            'statut' => 'En cours', // Match avec les statuts du web.php
-            'token_suivi' => (string) Str::uuid(),
-            'ecommercant_id' => $ecommercant->id,
-            'livreur_id' => $livreur->id,
-        ]);
-
-        // Historique d'affectation pour le colis en cours
-        Affectation::create([
-            'colis_id' => $colis2->id,
-            'livreur_id' => $livreur->id,
-            'date_affectation' => now()->subHours(2),
-            'statut' => 'en_cours',
-        ]);
-
-        // Colis 3 : Déjà Livré (Avec un Avis Client positif pour déclencher l'IA du Dashboard)
-        $colis3 = Colis::create([
-            'code_suivi' => 'NWS-DELIV555',
-            'nom_destinataire' => 'Amrabat',
-            'prenom_destinataire' => 'Sofyan',
-            'telephone_destinataire' => '0644332211',
-            'adresse_destinataire' => 'Marrakech, Gueliz',
-            'poids' => 2.0,
-            'prix' => 600.00,
-            'statut' => 'Livré', // Match avec les statuts du web.php
-            'token_suivi' => (string) Str::uuid(),
-            'ecommercant_id' => $ecommercant->id,
-            'livreur_id' => $livreur->id,
-        ]);
-
-        Affectation::create([
-            'colis_id' => $colis3->id,
-            'livreur_id' => $livreur->id,
-            'date_affectation' => now()->subDays(1),
-            'statut' => 'livre',
-        ]);
-
-        // Ajouter un avis positif pour faire plaisir à l'analyseur IA du dashboard
-        Avis::create([
-            'colis_id' => $colis3->id,
-            'note' => 5,
-            'commentaire' => 'Service excellent, livraison très rapide merci beaucoup !',
-            'sentiment' => 'positif',
-        ]);
-
-        // 4. CRÉATION D'UN LOG D'AUDIT INITIAL
+        // =========================================================================
+        // 📝 2. JOURNAL D'AUDIT (Pour garder une trace propre)
+        // =========================================================================
         AuditLog::create([
             'utilisateur_id' => $admin->id,
             'action' => 'INITIALIZATION',
             'entite' => 'system',
             'donnees_avant' => null,
-            'donnees_apres' => ['status' => 'System successfully populated for demonstration'],
+            'donnees_apres' => ['status' => 'Shipily cleaned. 0 colis, 0 comments, only 3 core accounts created.'],
         ]);
     }
 }

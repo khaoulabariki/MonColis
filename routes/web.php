@@ -72,14 +72,17 @@ Route::post('/suivi/{token}/avis', [AvisController::class, 'store'])->name('avis
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    
-    // 1. Tableau de bord principal avec Analyseur d'Avis IA intégré
+   
+    // 1. Tableau de bord principal avec Analyseur d'Avis IA + Liste Globale des Avis
     Route::get('/dashboard', function() {
         $totalColis = Colis::count() ?? 0;
         $livres = Colis::where('statut', 'Livré')->count() ?? 0; 
         $enCours = Colis::where('statut', 'En cours')->count() ?? 0;
         $retournes = Colis::where('statut', 'Retourné')->count() ?? 0;
         $annules = Colis::where('statut', 'Annulé')->count() ?? 0; 
+
+       
+        $recentAvis = \App\Models\Avis::with('colis')->orderBy('created_at', 'desc')->get();
 
         $allFeedbacks = Avis::pluck('commentaire')->toArray() ?? []; 
         $totalAvis = count($allFeedbacks);
@@ -91,9 +94,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
             }
         }
 
-        $tauxSatisfaction = $totalAvis > 0 ? round(($positifs / $totalAvis) * 100) : 100;
+       
+        $tauxSatisfaction = $totalAvis > 0 ? round(($positifs / $totalAvis) * 100) : 0;
         
-        if ($tauxSatisfaction >= 75) {
+        if ($totalAvis == 0) {
+           
+            $iaResume = "Aucune donnée disponible pour le moment (0 avis).";
+            $iaStatus = "Aucun Avis";
+            $iaColor = "bg-gray-500/10 text-gray-400 border-gray-500/20";
+        } elseif ($tauxSatisfaction >= 75) {
             $iaResume = "La majorité des destinataires sont très satisfaits de la rapidité de livraison et du comportement des livreurs.";
             $iaStatus = "Excellent";
             $iaColor = "bg-green-500/10 text-green-400 border-green-500/20";
@@ -109,7 +118,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
         return view('admin.dashboard', compact(
             'totalColis', 'livres', 'enCours', 'retournes', 'annules',
-            'tauxSatisfaction', 'iaResume', 'iaStatus', 'iaColor', 'totalAvis'
+            'tauxSatisfaction', 'iaResume', 'iaStatus', 'iaColor', 'totalAvis', 'recentAvis'
         ));
     })->name('dashboard');
 
@@ -224,6 +233,9 @@ Route::delete('/admin/colis/{id}/supprimer', function ($id) {
     return redirect()->route('admin.colis.index')->with('success', 'Colis supprimé avec succès !');
 })->name('admin.colis.destroy');
 
+
+// Route pour clôturer la caisse d'un livreur
+Route::post('/admin/finances/cloturer/{livreur_id}', [TransactionController::class, 'cloturerLivreur'])->name('admin.finances.cloturer');
 /*
 |--------------------------------------------------------------------------
 | Espace E-commerçant (Protégé par Auth et le rôle ecommercant)
@@ -231,13 +243,19 @@ Route::delete('/admin/colis/{id}/supprimer', function ($id) {
 */
 Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ecommercant.')->group(function () {
     
+    // Dashboard E-commerçant مع جلب التعليقات الخاصة بسلعتو فقط
     Route::get('/dashboard', function () {
         $totalColis = Colis::where('ecommercant_id', auth()->id())->count();
         $livres = Colis::where('ecommercant_id', auth()->id())->where('statut', 'Livré')->count();
         $enCours = Colis::where('ecommercant_id', auth()->id())->where('statut', 'En cours')->count();
         $retournes = Colis::where('ecommercant_id', auth()->id())->where('statut', 'Retourné')->count();
 
-        return view('ecommercant.dashboard', compact('totalColis', 'livres', 'enCours', 'retournes'));
+        // 🎯 جلب التعليقات المرتبطة بكوليس هاد الإيكوميرس فقط
+        $recentAvis = \App\Models\Avis::whereHas('colis', function($query) {
+            $query->where('ecommercant_id', auth()->id());
+        })->with('colis')->orderBy('created_at', 'desc')->get();
+
+        return view('ecommercant.dashboard', compact('totalColis', 'livres', 'enCours', 'retournes', 'recentAvis'));
     })->name('dashboard');
 
     Route::get('/finances', [WalletController::class, 'getWalletDetails'])->name('finances');
@@ -255,6 +273,33 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
     Route::get('/colis/creer', function () {
         return view('ecommercant.colis.create');
     })->name('colis.create');
+
+    // ✨ GESTION DES DESTINATAIRES (Ecommercant Space) ✨
+    Route::get('/destinataires', function () {
+        $destinataires = auth()->user()->destinataires()->latest()->get();
+        return view('ecommercant.destinataires.index', compact('destinataires'));
+    })->name('destinataires.index');
+
+    Route::post('/destinataires/store', function (Illuminate\Http\Request $request) {
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'telephone' => 'required|string|max:255',
+            'ville' => 'required|string|max:255',
+            'adresse' => 'required|string',
+        ]);
+
+        \App\Models\Destinataire::create([
+            'utilisateur_id' => auth()->id(),
+            'nom' => $request->nom,
+            'prenom' => $request->prenom,
+            'telephone' => $request->telephone,
+            'ville' => $request->ville,
+            'adresse' => $request->adresse,
+        ]);
+
+        return redirect()->back()->with('success', 'Destinataire enregistré avec succès !');
+    })->name('destinataires.store');
 });
 
 /*
@@ -265,12 +310,18 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
 Route::middleware(['auth', 'role:livreur'])->prefix('livreur')->name('livreur.')->group(function () {
     Route::put('/colis/{id}/statut', [\App\Http\Controllers\ColisController::class, 'updateStatut'])->name('colis.statut');
     
+    // Dashboard Livreur مع جلب التعليقات لي خلاو ليه الكليان على التوصيل ديالو
     Route::get('/dashboard', function () {
         $colisCount = Affectation::where('livreur_id', auth()->id())
             ->whereIn('statut', ['en_attente', 'en_cours'])
             ->count();
+            
+        // 🎯 جلب التعليقات المرتبطة بالكوليس لي وصّلها هاد الليفرور بالظبط
+        $recentAvis = \App\Models\Avis::whereHas('colis', function($query) {
+            $query->where('livreur_id', auth()->id());
+        })->with('colis')->orderBy('created_at', 'desc')->get();
         
-        return view('livreur.dashboard', compact('colisCount')); 
+        return view('livreur.dashboard', compact('colisCount', 'recentAvis')); 
     })->name('dashboard');
 
     Route::get('/mes-livraisons', function () {

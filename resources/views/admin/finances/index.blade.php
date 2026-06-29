@@ -4,52 +4,90 @@
 <div class="container-fluid my-6">
     
     {{-- 📋 1️⃣ En-tête de la page --}}
-    <div class="mb-8">
-        <span class="text-[10px] font-black text-[#0A4BB3] uppercase tracking-widest block mb-1">Trésorerie & Distribution</span>
-        <h2 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <i class="fas fa-wallet text-[#0A4BB3]"></i> Suivi des Finances
-        </h2>
-        <p class="text-sm text-slate-400 font-medium mt-0.5">Vue globale sur la trésorerie, traitement des retraits et situation des livreurs.</p>
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <span class="text-[10px] font-black text-[#0A4BB3] uppercase tracking-widest block mb-1">Trésorerie & Distribution</span>
+            <h2 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <i class="fas fa-wallet text-[#0A4BB3]"></i> Gestion de Caisse & Clôtures
+            </h2>
+            <p class="text-sm text-slate-400 font-medium mt-0.5">Suivi des fonds non récupérés, traitement des retraits et gestion des caisses livreurs.</p>
+        </div>
     </div>
 
-    {{-- 📊 2️⃣ LES SOLDES ET STATISTIQUES --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    @if(session('success'))
+        <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-2xl flex items-center gap-2">
+            <i class="fas fa-check-circle text-emerald-500 text-base"></i> {{ session('success') }}
+        </div>
+    @endif
+
+    @php
+        // On calcule UNIQUEMENT les colis livrés dont le cash n'a pas encore été récupéré par l'admin (encaissement_admin = false)
+        $colisNonClotures = \App\Models\Colis::where('statut', 'livre')->where('encaissement_admin', false);
         
-        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between">
+        $totalColisEnAttente = $colisNonClotures->count();
+        $cashEnAttenteGlobal = $colisNonClotures->sum('prix');
+        
+        // Règle : 50 DH Admin / 20 DH Livreur
+        $netAdminEnAttente = $totalColisEnAttente * 50; 
+        $gainsLivreursEnAttente = $totalColisEnAttente * 20; 
+    @endphp
+
+    {{-- 📊 2️⃣ LES STATISTIQUES DE LA CAISSE ACTUELLE (EN COURS) --}}
+    <div class="mb-2">
+        <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <i class="fas fa-chart-pie text-[#0A4BB3]"></i> Situation de la Période Active (Flux non clôturés)
+        </h4>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between">
             <div>
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Collecté (Cash Global)</span>
-                <h3 class="text-2xl font-black text-slate-900 tracking-tight">
-                    {{ number_format(\App\Models\Colis::where('statut', 'livre')->sum('prix'), 2) }} <span class="text-sm font-bold text-slate-400">DH</span>
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Cash en Circulation</span>
+                <h3 class="text-xl font-black text-slate-900 tracking-tight">
+                    {{ number_format($cashEnAttenteGlobal, 2) }} <span class="text-xs font-bold text-slate-400">DH</span>
                 </h3>
-                <p class="text-[10px] font-medium text-slate-400 mt-1">Total du cash généré sur la plateforme</p>
+                <p class="text-[10px] font-medium text-rose-500 mt-1"><i class="fas fa-clock mr-1"></i>Dans les poches des livreurs</p>
             </div>
-            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#0A4BB3] flex items-center justify-center text-lg shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#0A4BB3] flex items-center justify-center text-sm shadow-sm">
                 <i class="fas fa-money-bill-wave"></i>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between border-b-4 border-b-emerald-500">
             <div>
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Gains Plateforme (Les Frais)</span>
-                <h3 class="text-2xl font-black text-emerald-600 tracking-tight">
-                    {{ number_format(\App\Models\Colis::where('statut', 'livre')->count() * 50, 2) }} <span class="text-sm font-bold text-emerald-400">DH</span>
+                <span class="text-[9px] font-black text-emerald-700 uppercase tracking-widest block mb-1">A Récupérer par l'Admin (50 DH/u)</span>
+                <h3 class="text-xl font-black text-emerald-600 tracking-tight">
+                    {{ number_format($netAdminEnAttente, 2) }} <span class="text-xs font-bold text-emerald-400">DH</span>
                 </h3>
-                <p class="text-[10px] font-medium text-emerald-500 mt-1">Calculé sur la base de 50 DH fixes par livraison</p>
+                <p class="text-[10px] font-medium text-slate-400 mt-1">Gains plateforme à sécuriser</p>
             </div>
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shadow-sm">
-                <i class="fas fa-chart-line"></i>
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm shadow-sm">
+                <i class="fas fa-building-columns"></i>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between border-b-4 border-b-amber-500">
             <div>
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Solde E-commerçants</span>
-                <h3 class="text-2xl font-black text-amber-600 tracking-tight">
-                    {{ number_format(\App\Models\Wallet::whereNotNull('ecommercant_id')->sum('solde'), 2) }} <span class="text-sm font-bold text-amber-400">DH</span>
+                <span class="text-[9px] font-black text-amber-700 uppercase tracking-widest block mb-1">Commissions Livreurs (20 DH/u)</span>
+                <h3 class="text-xl font-black text-amber-600 tracking-tight">
+                    {{ number_format($gainsLivreursEnAttente, 2) }} <span class="text-xs font-bold text-amber-400">DH</span>
                 </h3>
-                <p class="text-[10px] font-medium text-slate-400 mt-1">Total des fonds dus aux marchands</p>
+                <p class="text-[10px] font-medium text-slate-400 mt-1">À déduire lors de la clôture</p>
             </div>
-            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm shadow-sm">
+                <i class="fas fa-motorcycle"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between">
+            <div>
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Solde Total E-com</span>
+                <h3 class="text-xl font-black text-slate-900 tracking-tight">
+                    {{ number_format(\App\Models\Wallet::whereNotNull('ecommercant_id')->sum('solde'), 2) }} <span class="text-xs font-bold text-slate-400">DH</span>
+                </h3>
+                <p class="text-[10px] font-medium text-slate-400 mt-1">Fonds totaux dus aux marchands</p>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center text-sm shadow-sm">
                 <i class="fas fa-hand-holding-usd"></i>
             </div>
         </div>
@@ -123,89 +161,114 @@
         </div>
     </div>
 
-    {{-- 👥 4️⃣ SOLDES DES E-COMMERÇANTS ET CASH DES LIVREURS --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xs overflow-hidden">
-            <div class="p-6 border-b border-slate-100">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Portefeuilles Marchands</span>
-                <h3 class="font-black text-slate-900 text-lg tracking-tight"><i class="fas fa-users text-[#0A4BB3] mr-1.5"></i>Soldes par E-commerçant</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs text-slate-600">
-                    <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[9px] tracking-widest border-b border-slate-100">
-                        <tr>
-                            <th class="py-4 px-5">E-commerçant</th>
-                            <th class="py-4 px-5 text-right">Solde Actuel</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 font-medium">
-                        @forelse(\App\Models\Utilisateur::where('role', 'ecommercant')->get() as $ecom)
-                            @php 
-                                $userWallet = \App\Models\Wallet::where('ecommercant_id', $ecom->id)->first(); 
-                            @endphp
-                            <tr class="hover:bg-slate-50/50 transition">
-                                <td class="py-4 px-5 font-bold text-slate-800 flex items-center gap-2">
-                                    <div class="w-6 h-6 rounded-md bg-blue-50 text-[#0A4BB3] flex items-center justify-center text-[10px]">
-                                        <i class="fas fa-store"></i>
-                                    </div>
-                                    {{ $ecom->nom }} {{ $ecom->prenom }}
-                                </td>
-                                <td class="py-4 px-5 font-black text-slate-900 text-right">
-                                    <span class="bg-slate-100 px-2.5 py-1 rounded-lg font-mono">
-                                        {{ number_format($userWallet->solde ?? 0, 2) }} DH
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="2" class="p-6 text-center text-slate-400">Aucun e-commerçant.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+    {{-- 👥 4️⃣ SOLDES DES E-COMMERÇANTS (Prend toute la ligne) --}}
+    <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xs overflow-hidden mb-8">
+        <div class="p-6 border-b border-slate-100">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Portefeuilles Marchands</span>
+            <h3 class="font-black text-slate-900 text-lg tracking-tight"><i class="fas fa-users text-[#0A4BB3] mr-1.5"></i>Soldes par E-commerçant</h3>
         </div>
-
-        <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xs overflow-hidden">
-            <div class="p-6 border-b border-slate-100">
-                <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest block mb-1">Fonds sur le terrain</span>
-                <h3 class="font-black text-slate-900 text-lg tracking-tight"><i class="fas fa-truck text-rose-500 mr-1.5"></i>Cash en poche par Livreur</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs text-slate-600">
-                    <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[9px] tracking-widest border-b border-slate-100">
-                        <tr>
-                            <th class="py-4 px-5">Livreur</th>
-                            <th class="py-4 px-5 text-right">Cash en jibe</th>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs text-slate-600">
+                <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[9px] tracking-widest border-b border-slate-100">
+                    <tr>
+                        <th class="py-4 px-5">E-commerçant</th>
+                        <th class="py-4 px-5 text-right">Solde Actuel</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    @forelse(\App\Models\Utilisateur::where('role', 'ecommercant')->get() as $ecom)
+                        @php 
+                            $userWallet = \App\Models\Wallet::where('ecommercant_id', $ecom->id)->first(); 
+                        @endphp
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-4 px-5 font-bold text-slate-800 flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-md bg-blue-50 text-[#0A4BB3] flex items-center justify-center text-[10px]">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                {{ $ecom->nom }} {{ $ecom->prenom }}
+                            </td>
+                            <td class="py-4 px-5 font-black text-slate-900 text-right">
+                                <span class="bg-slate-100 px-2.5 py-1 rounded-lg font-mono">
+                                    {{ number_format($userWallet->solde ?? 0, 2) }} DH
+                                </span>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 font-medium">
-                        @forelse(\App\Models\Utilisateur::where('role', 'livreur')->get() as $livreur)
-                            @php
-                                $cashEnPoche = \App\Models\Colis::where('livreur_id', $livreur->id)
-                                                               ->where('statut', 'livre')
-                                                               ->sum('prix');
-                            @endphp
-                            <tr class="hover:bg-slate-50/50 transition">
-                                <td class="py-4 px-5 font-bold text-slate-800 flex items-center gap-2">
-                                    <div class="w-6 h-6 rounded-md bg-rose-50 text-rose-600 flex items-center justify-center text-[10px]">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    {{ $livreur->nom }} {{ $livreur->prenom }}
-                                </td>
-                                <td class="py-4 px-5 font-black text-rose-600 text-right">
-                                    <span class="bg-rose-50 text-rose-700 px-2.5 py-1 rounded-lg font-mono">
-                                        {{ number_format($cashEnPoche, 2) }} DH
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="2" class="p-6 text-center text-slate-400">Aucun livreur trouvé.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                    @empty
+                        <tr><td colspan="2" class="p-6 text-center text-slate-400">Aucun e-commerçant.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+    </div>
 
+    {{-- 👥 5️⃣ SITUATION FINANCIERE DES LIVREURS (Prend toute la ligne) --}}
+    <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xs overflow-hidden">
+        <div class="p-6 border-b border-slate-100">
+            <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest block mb-1">Fonds & Distribution (Période Active)</span>
+            <h3 class="font-black text-slate-900 text-lg tracking-tight"><i class="fas fa-truck text-rose-500 mr-1.5"></i>Situation des caisses par Livreur</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs text-slate-600">
+                <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[9px] tracking-widest border-b border-slate-100">
+                    <tr>
+                        <th class="py-4 px-5">Livreur</th>
+                        <th class="py-4 px-5 text-center">Colis Non Récupérés</th>
+                        <th class="py-4 px-5 text-center text-amber-700">Gain Livreur (20DH)</th>
+                        <th class="py-4 px-5 text-center text-rose-700">Total Encaissé</th>
+                        <th class="py-4 px-5 text-center text-emerald-700">Dû à l'Admin</th>
+                        <th class="py-4 px-5 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    @forelse(\App\Models\Utilisateur::where('role', 'livreur')->get() as $livreur)
+                        @php
+                            $colisActifsQuery = \App\Models\Colis::where('livreur_id', $livreur->id)
+                                                                 ->where('statut', 'livre')
+                                                                 ->where('encaissement_admin', false);
+                            
+                            $colisLivreCount = $colisActifsQuery->count();
+                            $cashEnPoche = $colisActifsQuery->sum('prix');
+                            $rba7LivreurActuel = $colisLivreCount * 20; 
+                            $resteAVerserAdmin = $cashEnPoche - $rba7LivreurActuel;
+                        @endphp
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-4 px-5 font-bold text-slate-800 flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-md bg-rose-50 text-rose-600 flex items-center justify-center text-[10px]">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                {{ $livreur->nom }} {{ $livreur->prenom }}
+                            </td>
+                            <td class="py-4 px-5 text-center font-black text-slate-500">
+                                {{ $colisLivreCount }} u
+                            </td>
+                            <td class="py-4 px-5 text-center font-black text-amber-600">
+                                {{ number_format($rba7LivreurActuel, 2) }} DH
+                            </td>
+                            <td class="py-4 px-5 text-center font-black text-rose-600">
+                                {{ number_format($cashEnPoche, 2) }} DH
+                            </td>
+                            <td class="py-4 px-5 text-center font-black text-emerald-600">
+                                {{ number_format($resteAVerserAdmin, 2) }} DH
+                            </td>
+                            <td class="py-4 px-5 text-right">
+                                @if($colisLivreCount > 0)
+                                    <form action="{{ route('admin.finances.cloturer', $livreur->id) }}" method="POST" class="m-0 inline-block">
+                                        @csrf
+                                        <button type="submit" onclick="return confirm('Confirmer la récupération du cash et la clôture de la caisse pour ce livreur ?')" class="bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-md transition cursor-pointer border-0">
+                                            Clôturer la caisse
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="text-[10px] text-slate-300 font-bold uppercase mr-2">À jour</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6" class="p-6 text-center text-slate-400">Aucun livreur trouvé.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </div>

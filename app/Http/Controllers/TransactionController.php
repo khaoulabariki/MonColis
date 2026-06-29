@@ -22,4 +22,14 @@ class TransactionController extends Controller
         // 3. Retourner la vue Blade au lieu de renvoyer du JSON
         return view('admin.finances.index', compact('transactionsList', 'retraitsAttente'));
     }
+    public function cloturerLivreur($livreur_id)
+{
+    // Mettre à jour tous les colis livrés par ce livreur pour indiquer qu'ils ont été encaissés par l'administration
+    \App\Models\Colis::where('livreur_id', $livreur_id)
+                     ->where('statut', 'livre')
+                     ->where('encaissement_admin', false)
+                     ->update(['encaissement_admin' => true]);
+
+    return redirect()->back()->with('success', 'La caisse de ce livreur a été clôturée avec succès !');
+}
 }

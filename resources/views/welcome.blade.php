@@ -30,7 +30,7 @@
                     <span class="text-2xl font-black tracking-tight leading-none">
                         <span class="text-brand-blue">Ship</span><span class="text-brand-orange">ily</span>
                     </span>
-                    <span class="text-[9px] font-bold text-slate-400 tracking-widest uppercase mt-1">LVRAISON SIMPLIFIÉE</span>
+                    <span class="text-[9px] font-bold text-slate-400 tracking-widest uppercase mt-1">LIVRAISON SIMPLIFIÉE</span>
                 </div>
             </div>
             
@@ -82,50 +82,122 @@
                 </form>
             </div>
 
-            @if(isset($code))
-                <div class="mt-12 max-w-2xl mx-auto bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-2xl text-left transform transition-all duration-300">
-                    @if($colis)
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
-                            <div>
-                                <span class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Référence Unique</span>
-                                <h4 class="text-lg font-black text-slate-900">{{ $colis->code_suivi }}</h4>
-                            </div>
-                            <span class="bg-blue-50 text-brand-blue text-xs font-black px-4 py-2 rounded-xl border border-blue-100 uppercase tracking-wide shadow-sm flex items-center gap-2">
-                                <span class="w-2 h-2 bg-brand-blue rounded-full inline-block animate-pulse"></span>{{ $colis->statut }}
-                            </span>
+            @if($colis)
+            <div class="mt-12 bg-white rounded-3xl shadow-xl border border-slate-100 p-8 max-w-2xl mx-auto text-left transition-all duration-300">
+                
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-6 mb-8">
+                    <div>
+                        <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Référence Unique</span>
+                        <h2 class="text-xl font-black text-slate-900 tracking-tight mt-0.5">{{ $colis->code_suivi }}</h2>
+                    </div>
+                    
+                    @php
+                        $badgeColor = 'bg-slate-100 text-slate-700';
+                        $statutDisplay = str_replace('_', ' ', $colis->statut);
+                        
+                        if(in_array(strtolower($colis->statut), ['livré', 'livre'])) {
+                            $badgeColor = 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+                            $statutDisplay = 'Livré';
+                        }
+                        if(in_array(strtolower($colis->statut), ['en cours', 'en_cours'])) {
+                            $badgeColor = 'bg-amber-50 text-amber-700 border border-amber-200';
+                            $statutDisplay = 'En cours';
+                        }
+                        if(in_array(strtolower($colis->statut), ['retourné', 'retourne'])) {
+                            $badgeColor = 'bg-rose-50 text-rose-700 border border-rose-200';
+                            $statutDisplay = 'Retourné';
+                        }
+                        if(in_array(strtolower($colis->statut), ['annulé', 'annule'])) {
+                            $badgeColor = 'bg-rose-50 text-rose-700 border border-rose-200';
+                            $statutDisplay = 'Annulé';
+                        }
+                        if(in_array(strtolower($colis->statut), ['enregistre', 'ramassé', 'ramasse'])) {
+                            $badgeColor = 'bg-blue-50 text-brand-blue border border-blue-200';
+                            $statutDisplay = 'Ramassé';
+                        }
+                    @endphp
+                    <span class="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider {{ $badgeColor }}">
+                        {{ $statutDisplay }}
+                    </span>
+                </div>
+
+                @php
+                    $currentStatut = strtolower($colis->statut);
+                    
+                    $isRamasse = in_array($currentStatut, ['enregistre', 'ramassé', 'ramasse', 'en cours', 'en_cours', 'livré', 'livre']);
+                    $isEnCours = in_array($currentStatut, ['en cours', 'en_cours', 'livré', 'livre']);
+                    $isFinal = in_array($currentStatut, ['livré', 'livre', 'retourné', 'retourne', 'annulé', 'annule']);
+                    
+                    $isChorfaNormal = !in_array($currentStatut, ['retourné', 'retourne', 'annulé', 'annule']);
+                @endphp
+
+                <div class="relative flex flex-col justify-between h-48 pl-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[3px] before:bg-slate-100 mb-8">
+                    
+                    <div class="absolute left-[11px] top-2 w-[3px] bg-brand-blue transition-all duration-500"
+                         style="height: {{ $isFinal ? '100%' : ($isEnCours ? '50%' : ($isRamasse ? '0%' : '0%')) }}">
+                    </div>
+
+                    <div class="relative flex items-center gap-4">
+                        <div class="absolute -left-[31px] w-6 h-6 rounded-full border-4 {{ $isRamasse ? 'bg-brand-blue border-blue-100 z-10' : 'bg-white border-slate-200' }} flex items-center justify-center transition-all">
+                            @if($isRamasse) <i class="fas fa-check text-[9px] text-white"></i> @endif
                         </div>
-                        <div class="relative pl-7 space-y-8 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
-                            <div class="relative flex items-start gap-4">
-                                <div class="absolute -left-7 w-4.5 h-4.5 rounded-full border-4 border-white shadow bg-emerald-500"></div>
-                                <div>
-                                    <h5 class="text-sm font-bold text-slate-800">Expédié par le marchand</h5>
-                                    <p class="text-xs text-slate-400">Le colis a été pris en charge sur la plateforme Shipily.</p>
-                                </div>
+                        <h4 class="text-sm font-black {{ $isRamasse ? 'text-slate-900' : 'text-slate-400' }}">Ramassé</h4>
+                    </div>
+
+                    <div class="relative flex items-center gap-4">
+                        <div class="absolute -left-[31px] w-6 h-6 rounded-full border-4 {{ $isEnCours ? 'bg-brand-blue border-blue-100 z-10' : 'bg-white border-slate-200' }} flex items-center justify-center transition-all">
+                            @if($isEnCours) <i class="fas fa-truck text-[9px] text-white"></i> @endif
+                        </div>
+                        <h4 class="text-sm font-black {{ $isEnCours ? 'text-slate-900' : 'text-slate-400' }}">En cours</h4>
+                    </div>
+
+                    @if($isChorfaNormal)
+                        <div class="relative flex items-center gap-4">
+                            <div class="absolute -left-[31px] w-6 h-6 rounded-full border-4 {{ $currentStatut == 'livré' || $currentStatut == 'livre' ? 'bg-emerald-500 border-emerald-100 z-10' : 'bg-white border-slate-200' }} flex items-center justify-center transition-all">
+                                @if($currentStatut == 'livré' || $currentStatut == 'livre') <i class="fas fa-check text-[9px] text-white"></i> @endif
                             </div>
-                            <div class="relative flex items-start gap-4">
-                                <div class="absolute -left-7 w-4.5 h-4.5 rounded-full border-4 border-white shadow {{ in_array(strtolower($colis->statut), ['en_cours', 'livre', 'livré']) ? 'bg-emerald-500' : 'bg-slate-300' }}"></div>
-                                <div>
-                                    <h5 class="text-sm font-bold {{ in_array(strtolower($colis->statut), ['en_cours', 'livre', 'livré']) ? 'text-slate-800' : 'text-slate-400' }}">En cours de livraison</h5>
-                                    <p class="text-xs text-slate-400">Le colis est actuellement en route.</p>
-                                </div>
-                            </div>
-                            <div class="relative flex items-start gap-4">
-                                <div class="absolute -left-7 w-4.5 h-4.5 rounded-full border-4 border-white shadow {{ in_array(strtolower($colis->statut), ['livre', 'livré']) ? 'bg-emerald-500' : 'bg-slate-300' }}"></div>
-                                <div>
-                                    <h5 class="text-sm font-bold {{ in_array(strtolower($colis->statut), ['livre', 'livré']) ? 'text-slate-800' : 'text-slate-400' }}">Livré à destination 🎉</h5>
-                                    <p class="text-xs text-slate-400">Colis remis en main propre avec succès.</p>
-                                </div>
-                            </div>
+                            <h4 class="text-sm font-black {{ $currentStatut == 'livré' || $currentStatut == 'livre' ? 'text-emerald-600' : 'text-slate-400' }}">Livré</h4>
                         </div>
                     @else
-                        <div class="text-center py-6">
-                            <div class="bg-rose-50 text-rose-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto text-lg mb-3">
-                                <i class="fas fa-exclamation-triangle"></i>
+                        <div class="relative flex items-center gap-4">
+                            <div class="absolute -left-[31px] w-6 h-6 rounded-full border-4 bg-rose-500 border-rose-100 z-10 flex items-center justify-center">
+                                <i class="fas fa-times text-[9px] text-white"></i>
                             </div>
-                            <h4 class="text-sm font-bold text-slate-800">Aucun colis trouvé</h4>
+                            <h4 class="text-sm font-black text-rose-600">
+                                {{ in_array($currentStatut, ['annulé', 'annule']) ? 'Annulé' : 'Retourné' }}
+                            </h4>
                         </div>
                     @endif
                 </div>
+
+                @if(in_array($currentStatut, ['livré', 'livre']))
+                    <div class="border-t border-slate-100 pt-6 mt-6">
+                        <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <i class="fas fa-comment-alt text-brand-blue"></i> Laissez votre avis sur la livraison
+                        </h3>
+                        
+                        @if(session('success'))
+                            <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl mb-4">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
+                        <form action="{{ route('avis.store', $colis->token_suivi) }}" method="POST" class="space-y-3">
+                            @csrf
+                            <textarea name="commentaire" rows="3" required 
+                                placeholder="Votre avis nous intéresse" 
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-brand-blue flex-1 resize-none"></textarea>
+                            
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-brand-blue hover:bg-blue-800 text-white font-black px-4 py-2.5 rounded-xl text-[11px] tracking-wider uppercase transition shadow-xs cursor-pointer">
+                                    Envoyer mon avis
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                @endif
+
+            </div>
             @endif
         </div>
         <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1000px] h-[300px] bg-blue-50/40 rounded-full blur-3xl -z-10"></div>
@@ -199,16 +271,16 @@
         </div>
     </section>
 
-    <footer class="bg-slate-900 text-slate-500 py-12 border-t border-slate-800">
+    <footer class="bg-white text-slate-400 py-12 border-t border-slate-100">
         <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-sm">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center relative overflow-hidden">
+                <div class="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center relative overflow-hidden shadow-xs">
                     <div class="absolute inset-0 border-r-2 border-white/20 transform rotate-45 scale-150"></div>
                     <i class="fas fa-arrow-up text-brand-orange text-xs transform rotate-45"></i>
                 </div>
-                <span class="text-white font-black tracking-tight text-lg"><span class="text-brand-blue">Ship</span><span class="text-brand-orange">ily</span></span>
+                <span class="text-slate-900 font-black tracking-tight text-lg"><span class="text-brand-blue">Ship</span><span class="text-brand-orange">ily</span></span>
             </div>
-            <p class="text-xs text-slate-400">© 2026 Shipily. Tous droits réservés.</p>
+            <p class="text-xs font-bold text-slate-400">© 2026 Shipily. Tous droits réservés. <span class="text-brand-blue ml-1">#SmartLogistics</span></p>
         </div>
     </footer>
 

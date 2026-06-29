@@ -60,4 +60,9 @@ class Utilisateur extends Authenticatable
     {
         return $this->hasMany(AuditLog::class, 'utilisateur_id');
     }
+
+    public function destinataires()
+{
+    return $this->hasMany(Destinataire::class, 'utilisateur_id');
+}
 }
