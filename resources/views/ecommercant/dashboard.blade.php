@@ -63,32 +63,63 @@
         </div>
     </div>
 
-    <div class="bg-emerald-50 border border-emerald-100 p-6 rounded-3xl shadow-xs flex flex-col justify-between">
-        <div>
-            <div class="flex items-center justify-between mb-4">
-                <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-600 text-white px-2.5 py-1 rounded-lg">
-                    <i class="fas fa-heart text-[9px] mr-1"></i> Avis & Sentiments
-                </span>
-                <span class="text-2xl animate-bounce">✨ 😊 ✨</span>
+    {{-- 🛠️ التعديل هنا: يرجع رمادي ومحايد 0% يلا كانت الـ داتا خاوية --}}
+    @if(isset($recentAvis) && $recentAvis->count() > 0)
+        <div class="bg-emerald-50 border border-emerald-100 p-6 rounded-3xl shadow-xs flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-600 text-white px-2.5 py-1 rounded-lg">
+                        <i class="fas fa-heart text-[9px] mr-1"></i> Avis & Sentiments
+                    </span>
+                    <span class="text-2xl animate-bounce">✨ 😊 ✨</span>
+                </div>
+                
+                <h4 class="text-base font-black text-emerald-950 tracking-tight mb-2">Humeur Générale</h4>
+                
+                <p class="text-xs text-emerald-800 leading-relaxed font-medium">
+                    {{ $rapportSentiment ?? "Excellente tendance ! Les destinataires affichent un sentiment positif." }}
+                </p>
             </div>
-            
-            <h4 class="text-base font-black text-emerald-950 tracking-tight mb-2">Humeur Générale</h4>
-            
-            <p class="text-xs text-emerald-800 leading-relaxed font-medium">
-                {{ $rapportSentiment ?? "Excellente tendance ! 84% de vos destinataires affichent un sentiment très positif. Les mots qui reviennent le plus : 'Livreur poli', 'Emballage intact' et 'Service rapide'. Attention toutefois à 2 retours négatifs concernant des appels tardifs." }}
-            </p>
-        </div>
 
-        <div class="mt-6 pt-4 border-t border-emerald-200/60">
-            <div class="flex justify-between text-xs font-black text-emerald-950 mb-1">
-                <span>Score de satisfaction</span>
-                <span>88%</span>
-            </div>
-            <div class="w-full bg-emerald-200 rounded-full h-2">
-                <div class="bg-emerald-600 h-2 rounded-full" style="width: 88%"></div>
+            <div class="mt-6 pt-4 border-t border-emerald-200/60">
+                <div class="flex justify-between text-xs font-black text-emerald-950 mb-1">
+                    <span>Score de satisfaction</span>
+                    <span>{{ $tauxSatisfaction ?? 100 }}%</span>
+                </div>
+                <div class="w-full bg-emerald-200 rounded-full h-2">
+                    <div class="bg-emerald-600 h-2 rounded-full" style="width: {{ $tauxSatisfaction ?? 100 }}%"></div>
+                </div>
             </div>
         </div>
-    </div>
+    @else
+        {{-- هاد الكارد الـ Neutre هو اللي غايبان دابا حيت كلشي خاوي 0 --}}
+        <div class="bg-slate-50 border border-slate-200 p-6 rounded-3xl shadow-xs flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-[10px] font-black uppercase tracking-wider bg-slate-400 text-white px-2.5 py-1 rounded-lg">
+                        <i class="fas fa-comment-slash text-[9px] mr-1"></i> Aucun Avis
+                    </span>
+                    <span class="text-2xl">😶</span>
+                </div>
+                
+                <h4 class="text-base font-black text-slate-700 tracking-tight mb-2">Humeur Générale</h4>
+                
+                <p class="text-xs text-slate-500 leading-relaxed font-medium italic">
+                    Aucune donnée disponible pour le moment. Les statistiques de satisfaction s'afficheront dès que vos clients laisseront des commentaires.
+                </p>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-200">
+                <div class="flex justify-between text-xs font-black text-slate-400 mb-1">
+                    <span>Score de satisfaction</span>
+                    <span>0%</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2">
+                    <div class="bg-slate-400 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 
@@ -135,6 +166,7 @@
         });
     });
 </script>
+
 <div class="mt-8 bg-white rounded-3xl shadow-xs border border-slate-200/60 overflow-hidden w-full p-6 text-left">
     <div class="mb-6">
         <h3 class="text-sm font-black text-slate-950 uppercase tracking-wider flex items-center gap-2">
@@ -154,7 +186,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 font-bold text-xs">
-                @forelse($recentAvis as $avis)
+                @forelse($recentAvis ?? [] as $avis)
                     <tr class="hover:bg-slate-50/30 transition">
                         <td class="p-4 pl-6 text-brand-blue font-mono">{{ $avis->colis->code_suivi ?? 'N/A' }}</td>
                         <td class="p-4 text-slate-900 font-black">{{ $avis->colis->prenom_destinataire ?? '' }} {{ $avis->colis->nom_destinataire ?? 'Client' }}</td>

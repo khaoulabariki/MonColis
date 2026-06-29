@@ -77,6 +77,7 @@
                                     <th class="p-4 pl-6">Code Suivi</th>
                                     <th class="p-4">Destinataire</th>
                                     <th class="p-4">Adresse</th>
+                                    <th class="p-4">Prix</th> {{-- 🆕 زدنا هاد العمود ف العنوان --}}
                                     <th class="p-4">Statut</th>
                                     <th class="p-4 pr-6">Actions</th>
                                 </tr>
@@ -88,9 +89,9 @@
                                     <td class="p-4 pl-6 font-black text-brand-blue font-mono">{{ $c->code_suivi }}</td>
                                     <td class="p-4 text-slate-900">{{ $c->prenom_destinataire }} {{ $c->nom_destinataire }}</td>
                                     <td class="p-4 text-slate-500 font-medium max-w-xs truncate">{{ $c->adresse_destinataire }}</td>
+                                    <td class="p-4 text-slate-900 font-mono font-black text-emerald-600">{{ number_format($c->prix, 2) }} DH</td> {{-- 🆕 زدنا الثمن هنا ب صيغة أنيقة --}}
                                     <td class="p-4">
                                         @php
-                                            // الـ keys هنا خليتهم كيف مسجلين ف الـ DB باش يخدموا بلا مشاكل
                                             $colors = [
                                                 'enregistre' => 'bg-slate-100 text-slate-700 border-slate-200',
                                                 'ramasse'    => 'bg-blue-50 text-brand-blue border-blue-100',
@@ -100,7 +101,6 @@
                                                 'annule'     => 'bg-rose-50 text-rose-700 border-rose-100',
                                             ];
 
-                                            // هاد الـ Array كيعوض الكلمات باش يظهروا بـ Les accents ف الـ الواجهة بشكل أنيق
                                             $labels = [
                                                 'enregistre' => 'enregistré',
                                                 'ramasse'    => 'ramassé',
@@ -141,7 +141,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" class="p-12 text-center text-slate-400 font-medium">
+                                    <td colspan="6" class="p-12 text-center text-slate-400 font-medium"> {{-- رجعناها 6 بلاصة 5 حيت تزاد عمود --}}
                                         <div class="text-slate-300 text-2xl mb-2"><i class="fas fa-box-open"></i></div>
                                         Aucune livraison affectée pour le moment.
                                     </td>
