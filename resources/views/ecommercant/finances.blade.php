@@ -1,116 +1,115 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    .text-brand-blue { color: #0A4BB3; }
-    .bg-brand-blue { background-color: #0A4BB3; }
-    .hover\:bg-brand-blue-dark:hover { background-color: #083D93; }
-    .text-brand-orange { color: #FF6B00; }
-    .bg-brand-orange { background-color: #FF6B00; }
-    .hover\:bg-brand-orange-dark:hover { background-color: #E05E00; }
-</style>
-
-<div class="w-full max-w-7xl mx-auto my-4">
+<div class="container-fluid my-6">
     
-    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <!-- Page Header -->
+    <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Mon Portefeuille Financier</h1>
-            <p class="text-xs font-medium text-slate-400 mt-1">Suivez votre solde disponible, vos gains réels et l'historique de vos demandes.</p>
+            <h2 class="text-2xl font-bold text-slate-800">
+                <i class="fas fa-wallet text-indigo-500 mr-2"></i>Mon Portefeuille Financier
+            </h2>
+            <p class="text-sm text-slate-500">Suivez votre solde disponible, vos gains réels et l'historique de vos colis livrés.</p>
         </div>
+        <!-- Bouton pour ouvrir le Modal de retrait directement depuis le Header si besoin -->
         <div>
-            <button onclick="openRetraitModal()" class="bg-brand-orange hover:bg-brand-orange-dark text-white font-black px-5 py-3 rounded-xl text-xs tracking-wider uppercase transition shadow-xs flex items-center gap-2 cursor-pointer">
-                <i class="fas fa-hand-holding-usd text-sm"></i> Demander un retrait
+            <button onclick="openRetraitModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-sm transition flex items-center gap-2 cursor-pointer">
+                <i class="fas fa-hand-holding-usd"></i> Demander un retrait
             </button>
         </div>
     </div>
 
+    <!-- 📊 Financial Statistics Section (E-commerçant View) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         
-        <div class="p-6 bg-white rounded-3xl border border-slate-200/60 shadow-xs flex flex-col justify-between min-h-[140px] border-b-4 border-b-brand-blue">
+        <!-- CARD 1: Solde Actuel Disponible (Calculated dynamically) -->
+        <div class="bg-gradient-to-br from-indigo-50 to-white p-6 rounded-xl border border-indigo-100 shadow-sm">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-[10px] font-black text-brand-blue uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-md">Solde Disponible</span>
-                <div class="w-8 h-8 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center text-sm shadow-xs">
+                <span class="text-xs font-bold text-indigo-700 uppercase tracking-wider">Solde Disponible</span>
+                <div class="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center shadow-sm">
                     <i class="fas fa-vault"></i>
                 </div>
             </div>
-            <h3 class="text-3xl font-black text-slate-900 tracking-tight">
+            <h3 class="text-3xl font-black text-slate-800">
                 @php
                     $colisLivresCount = \App\Models\Colis::where('ecommercant_id', auth()->id())->where('statut', 'livre')->count();
                     $totalBrut = \App\Models\Colis::where('ecommercant_id', auth()->id())->where('statut', 'livre')->sum('prix');
-                    $soldeDynamique = $totalBrut - ($colisLivresCount * 50);
+                    $retraitsEnAttente = \App\Models\Retrait::where('ecommercant_id', auth()->id())->where('statut', 'en_attente')->sum('montant');
+                    $soldeDynamique = ($wallet->solde ?? 0) - $retraitsEnAttente;
                 @endphp
-                {{ number_format($soldeDynamique, 2) }} <span class="text-sm font-black text-slate-400">DH</span>
+                {{ number_format($soldeDynamique, 2) }} <span class="text-lg font-bold text-slate-500">DH</span>
             </h3>
-            <p class="text-[11px] text-slate-400 font-medium mt-2"><i class="fas fa-circle-check text-brand-blue/70 mr-1"></i> Fonds calculés sur vos livraisons réussies</p>
+            <p class="text-[10px] text-indigo-600 font-medium mt-2">👉 Solde disponible prenant en compte vos retraits</p>
         </div>
 
-        <div class="p-6 bg-white rounded-3xl border border-slate-200/60 shadow-xs flex flex-col justify-between min-h-[140px]">
+        <!-- CARD 2: Chiffre d'Affaires Brut -->
+        <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-md">Chiffre d'Affaires Brut</span>
-                <div class="w-8 h-8 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center text-sm">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Chiffre d'Affaires Brut</span>
+                <div class="w-8 h-8 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center">
                     <i class="fas fa-money-bill-wave"></i>
                 </div>
             </div>
-            <h3 class="text-3xl font-black text-slate-900 tracking-tight">
-                {{ number_format($totalBrut, 2) }} <span class="text-sm font-black text-slate-400">DH</span>
+            <h3 class="text-2xl font-bold text-slate-800">
+                {{ number_format($totalBrut, 2) }} <span class="text-sm font-bold text-slate-400">DH</span>
             </h3>
-            <p class="text-[11px] text-slate-400 font-medium mt-2">Cumul total des ventes (Frais inclus)</p>
+            <p class="text-[10px] text-slate-400 mt-1">Cumul total des ventes générées (Frais inclus)</p>
         </div>
 
-        <div class="p-6 bg-white rounded-3xl border border-slate-200/60 shadow-xs flex flex-col justify-between min-h-[140px] border-b-4 border-b-emerald-500">
+        <!-- CARD 3: Nombre de Colis Livrés -->
+        <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-[10px] font-black text-emerald-700 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-md">Colis Livrés</span>
-                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Colis Livrés</span>
+                <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
                     <i class="fas fa-box-open"></i>
                 </div>
             </div>
-            <h3 class="text-3xl font-black text-slate-900 tracking-tight">
-                {{ $colisLivresCount }} <span class="text-sm font-black text-slate-400">colis délivrés</span>
+            <h3 class="text-2xl font-bold text-slate-800">
+                {{ $colisLivresCount }} 
+                <span class="text-sm font-normal text-slate-500 ml-1">colis délivré(s)</span>
             </h3>
-            <p class="text-[11px] text-emerald-600 font-medium mt-2"><i class="fas fa-arrow-trend-up mr-1"></i> Taux de livraison réussi avec succès</p>
+            <p class="text-[10px] text-emerald-600 font-medium mt-1">Taux de livraison réussi avec succès</p>
         </div>
 
     </div>
 
-    <div class="bg-white rounded-3xl shadow-xs border border-slate-200/60 overflow-hidden mb-8 w-full">
-        <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <!-- 📋 TABLEAU 1 : HISTORIQUE DES GAINS ET ENCAISSEMENTS -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden mb-8">
+        <div class="p-6 border-b border-slate-100 bg-emerald-50/20 flex items-center justify-between">
             <div>
-                <h3 class="font-black text-slate-900 text-sm uppercase tracking-wider"><i class="fas fa-check-double text-emerald-500 mr-2"></i>Détail de mes gains par colis</h3>
-                <p class="text-xs text-slate-400 font-medium mt-0.5">Retrouvez la liste de vos colis livrés et le montant net crédité sur votre solde.</p>
+                <h3 class="font-bold text-slate-800 text-base"><i class="fas fa-check-double text-emerald-500 mr-2"></i>Détail de mes gains par colis</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Retrouvez la liste de vos colis livrés et le montant net crédité sur votre solde.</p>
             </div>
-            <span class="text-[10px] bg-emerald-50 text-emerald-700 font-black px-2.5 py-1 rounded-md border border-emerald-100 uppercase tracking-wider self-start sm:self-center">Automatique</span>
+            <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">Automatique</span>
         </div>
-        <div class="overflow-x-auto w-full">
+        <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-sm text-slate-600">
-                <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[10px] tracking-widest border-b border-slate-100">
+                <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[11px] tracking-wider">
                     <tr>
-                        <th class="p-4 pl-6">Code Colis</th>
+                        <th class="p-4">Code Colis</th>
                         <th class="p-4">Destinataire / Ville</th>
                         <th class="p-4">Prix du Colis</th>
                         <th class="p-4">Frais de Livraison</th>
-                        <th class="p-4 pr-6 text-right">Montant Net Crédité</th>
+                        <th class="p-4 text-right">Montant Net Crédité</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 font-bold text-xs">
+                <tbody class="divide-y divide-slate-100 font-medium">
                     @forelse(\App\Models\Colis::where('ecommercant_id', auth()->id())->where('statut', 'livre')->orderBy('updated_at', 'desc')->get() as $colisEcom)
-                        <tr class="hover:bg-slate-50/30 transition">
-                            <td class="p-4 pl-6 font-black text-brand-blue font-mono">#{{ $colisEcom->code_suivi }}</td>
-                            <td class="p-4 text-slate-900">
-                                <div class="font-black">{{ $colisEcom->nom_destinataire }} {{ $colisEcom->prenom_destinataire }}</div>
-                                <div class="text-[11px] text-slate-400 font-medium mt-0.5"><i class="fas fa-map-marker-alt mr-1 text-slate-300"></i>{{ $colisEcom->adresse_destinataire }}</div>
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="p-4 font-semibold text-indigo-600">#{{ $colisEcom->code_suivi }}</td>
+                            <td class="p-4 text-slate-700">
+                                <div class="font-semibold">{{ $colisEcom->nom_destinataire }} {{ $colisEcom->prenom_destinataire }}</div>
+                                <div class="text-[11px] text-slate-400"><i class="fas fa-map-marker-alt mr-1"></i>{{ $colisEcom->adresse_destinataire }}</div>
                             </td>
-                            <td class="p-4 text-slate-500 font-black">{{ number_format($colisEcom->prix, 2) }} DH</td>
-                            <td class="p-4 text-rose-500 font-black">- 50.00 DH</td>
-                            <td class="p-4 pr-6 text-emerald-600 font-black text-right text-sm">
+                            <td class="p-4 text-slate-400 font-bold">{{ number_format($colisEcom->prix, 2) }} DH</td>
+                            <td class="p-4 text-rose-500 font-semibold">- 50.00 DH</td>
+                            <td class="p-4 text-emerald-600 font-extrabold text-right text-base">
                                 + {{ number_format($colisEcom->prix - 50, 2) }} DH
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="p-12 text-center text-slate-400 font-medium">
-                                <div class="text-slate-200 text-2xl mb-1"><i class="fas fa-wallet"></i></div>
-                                Aucun colis livré pour le moment. Votre solde augmentera dès qu'un colis sera validé.
-                            </td>
+                            <td colspan="5" class="p-8 text-center text-slate-400 text-xs">Aucun colis livré pour le moment. Votre solde augmentera dès qu'un colis sera validé.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -118,49 +117,48 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-3xl shadow-xs border border-slate-200/60 overflow-hidden mb-8 w-full">
-        <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-            <h3 class="font-black text-slate-900 text-sm uppercase tracking-wider"><i class="fas fa-history text-brand-blue mr-2"></i>Suivi de mes Demandes de Retrait</h3>
-            <p class="text-xs text-slate-400 font-medium mt-0.5">Consultez l'état de traitement de vos demandes de virement de fonds en temps réel.</p>
+    <!-- 📋 TABLEAU 2 : HISTORIQUE DES DEMANDES DE RETRAIT (NOUVEAU) -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden mb-8">
+        <div class="p-6 border-b border-slate-100 bg-indigo-50/20">
+            <h3 class="font-bold text-slate-800 text-base"><i class="fas fa-history text-indigo-500 mr-2"></i>Suivi de mes Demandes de Retrait</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Consultez l'état de traitement de vos demandes de virement de fonds en temps réel.</p>
         </div>
-        <div class="overflow-x-auto w-full">
+        <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-sm text-slate-600">
-                <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[10px] tracking-widest border-b border-slate-100">
+                <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[11px] tracking-wider">
                     <tr>
-                        <th class="p-4 pl-6">ID Demande</th>
+                        <th class="p-4">ID Demande</th>
                         <th class="p-4">Montant Demandé</th>
                         <th class="p-4">Date de Création</th>
-                        <th class="p-4 pr-6 text-center">Statut de Validation</th>
+                        <th class="p-4 text-center">Statut de Validation</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 font-bold text-xs">
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    <!-- Récupération dynamique de toutes les demandes de retrait de l'e-commerçant -->
                     @forelse(\App\Models\Retrait::where('ecommercant_id', auth()->id())->latest()->get() as $monRetrait)
-                        <tr class="hover:bg-slate-50/30 transition">
-                            <td class="p-4 pl-6 font-black text-slate-700">#{{ $monRetrait->id }}</td>
-                            <td class="p-4 font-black text-slate-900 text-sm">{{ number_format($monRetrait->montant, 2) }} DH</td>
-                            <td class="p-4 text-slate-400 font-medium font-mono text-[11px]">{{ $monRetrait->created_at->format('d/m/Y H:i') }}</td>
-                            <td class="p-4 pr-6 text-center">
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="p-4 font-bold text-slate-700">#{{ $monRetrait->id }}</td>
+                            <td class="p-4 font-extrabold text-slate-800 text-base">{{ number_format($monRetrait->montant, 2) }} DH</td>
+                            <td class="p-4 text-slate-400 text-xs">{{ $monRetrait->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="p-4 text-center">
                                 @if($monRetrait->statut === 'en_attente')
-                                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide bg-amber-50 text-amber-600 border border-amber-100">
-                                        <i class="fas fa-hourglass-half mr-1"></i> En attente
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-600 border border-amber-200">
+                                        <i class="fas fa-hourglass-half mr-1 text-[10px]"></i> En attente
                                     </span>
                                 @elseif($monRetrait->statut === 'valide')
-                                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                        <i class="fas fa-check-circle mr-1"></i> Validée (Payée)
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
+                                        <i class="fas fa-check-circle mr-1 text-[10px]"></i> Validée (Payée)
                                     </span>
                                 @elseif($monRetrait->statut === 'rejete')
-                                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide bg-rose-50 text-rose-600 border border-rose-100">
-                                        <i class="fas fa-times-circle mr-1"></i> Refusée
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200">
+                                        <i class="fas fa-times-circle mr-1 text-[10px]"></i> Refusée
                                     </span>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="p-12 text-center text-slate-400 font-medium">
-                                <div class="text-slate-200 text-2xl mb-1"><i class="fas fa-comment-dollar"></i></div>
-                                Vous n'avez soumis aucune demande de retrait pour le moment.
-                            </td>
+                            <td colspan="4" class="p-8 text-center text-slate-400 text-xs">Vous n'avez soumis aucune demande de retrait pour le moment.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -170,39 +168,47 @@
 
 </div>
 
-<div id="retraitModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 w-full max-w-md p-6 transform scale-95 transition-transform duration-300 mx-4">
+<!-- 💰 MODAL: DEMANDE DE RETRAIT (CONNECTED TO RETRAITCONTROLLER) -->
+<div id="retraitModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-md p-6 transform scale-95 transition-transform duration-300">
         
-        <div class="flex items-center justify-between mb-6 border-b border-slate-100 pb-3">
-            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider"><i class="fas fa-money-check-alt text-brand-blue mr-2"></i>Demande de Retrait</h3>
-            <button onclick="closeRetraitModal()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">&times;</button>
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+            <h3 class="text-lg font-bold text-slate-800"><i class="fas fa-money-check-alt text-indigo-500 mr-2"></i>Nouvelle Demande de Retrait</h3>
+            <button onclick="closeRetraitModal()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
         </div>
 
-        <div id="modalAlert" class="hidden p-3 rounded-xl text-xs font-bold mb-4"></div>
+        <!-- Alert Message Container -->
+        <div id="modalAlert" class="hidden p-3 rounded-xl text-xs font-semibold mb-4"></div>
 
+        <!-- Submission Form linked to RetraitController@demanderRetrait -->
         <form id="retraitForm" onsubmit="submitRetrait(event)">
             @csrf
             
+            <!-- Hidden Input to identify the current logged-in E-commercant -->
             <input type="hidden" name="ecommercant_id" id="ecommercant_id" value="{{ auth()->id() }}">
 
-            <div class="mb-6">
-                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Montant à retirer (DH)</label>
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Montant à retirer (DH)</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm font-mono">DH</span>
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">DH</span>
+                    <!-- Input name matches the validator in RetraitController -->
                     <input type="number" name="montant" id="montant" min="10" max="{{ $soldeDynamique ?? 0 }}" placeholder="Ex: 500" required
-                           class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-blue font-black text-slate-800">
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 font-semibold text-slate-800">
                 </div>
-                <p class="text-[10px] text-slate-400 font-medium mt-2">Le montant minimum de retrait est fixé à 100.00 DH.</p>
+                <p class="text-[10px] text-slate-400 mt-1.5">Le montant minimum de retrait est fixé à 10.00 DH.</p>
             </div>
 
-            <div class="flex items-center gap-3 justify-end border-t border-slate-100 pt-4">
-                <button type="button" onclick="closeRetraitModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 rounded-lg cursor-pointer">Annuler</button>
-                <button type="submit" id="submitBtn" class="px-5 py-2.5 text-xs font-black text-white bg-brand-blue hover:bg-brand-blue-dark rounded-xl shadow-xs uppercase tracking-wider transition cursor-pointer">Envoyer la demande</button>
+            <!-- Modal Action Buttons -->
+            <div class="flex items-center gap-3 justify-end border-t border-slate-100 pt-3">
+                <button type="button" onclick="closeRetraitModal()" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 rounded-lg">Annuler</button>
+                <button type="submit" id="submitBtn" class="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition">Envoyer la demande</button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- 📜 JAVASCRIPT SCRIPT TO CONTROL THE VUE & AJAX SUBMISSION -->
 <script>
     function openRetraitModal() {
         const modal = document.getElementById('retraitModal');
@@ -224,6 +230,7 @@
         }, 300);
     }
 
+    // Dynamic opening if URL contains ?action=retrait
     document.addEventListener("DOMContentLoaded", function() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('action') === 'retrait') {
@@ -231,6 +238,7 @@
         }
     });
 
+    // Handle AJAX form submission to prevent raw JSON view
     function submitRetrait(event) {
         event.preventDefault();
         
@@ -246,6 +254,7 @@
             _token: '{{ csrf_token() }}'
         };
 
+        // Submitting data using real route name
         fetch("/ecommercant/finances/retrait", {
             method: "POST",
             headers: {
@@ -257,14 +266,16 @@
         .then(response => response.json().then(data => ({ status: response.status, body: data })))
         .then(res => {
             if (res.status === 201) {
-                alertBox.className = "p-3 rounded-xl text-xs font-bold mb-4 bg-emerald-50 text-emerald-800 border border-emerald-200";
+                // Success action
+                alertBox.className = "p-3 rounded-xl text-xs font-semibold mb-4 bg-green-50 text-green-700 border border-green-200";
                 alertBox.innerText = res.body.message;
                 alertBox.classList.remove('hidden');
                 setTimeout(() => {
                     window.location.href = "{{ route('ecommercant.finances') }}";
                 }, 1500);
             } else {
-                alertBox.className = "p-3 rounded-xl text-xs font-bold mb-4 bg-rose-50 text-rose-800 border border-rose-200";
+                // Controller errors (e.g. Insufficient balance)
+                alertBox.className = "p-3 rounded-xl text-xs font-semibold mb-4 bg-red-50 text-red-700 border border-red-200";
                 alertBox.innerText = res.body.message || "Une erreur est survenue.";
                 alertBox.classList.remove('hidden');
                 submitBtn.disabled = false;
@@ -272,7 +283,7 @@
             }
         })
         .catch(error => {
-            alertBox.className = "p-3 rounded-xl text-xs font-bold mb-4 bg-rose-50 text-rose-800 border border-rose-200";
+            alertBox.className = "p-3 rounded-xl text-xs font-semibold mb-4 bg-red-50 text-red-700 border border-red-200";
             alertBox.innerText = "Erreur de connexion au serveur.";
             alertBox.classList.remove('hidden');
             submitBtn.disabled = false;

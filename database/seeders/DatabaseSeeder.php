@@ -47,28 +47,7 @@ class DatabaseSeeder extends Seeder
             'statut' => true,
         ]);
 
-        // 2️⃣ L'E-COMMERÇANT (Ikram Belkhaoua)
-        // الملاحظة: الـ role خليتو 'ecommercant' على حساب الـ Seeder القديم ديالك
-        $ecom = Utilisateur::create([
-            'nom' => 'Belkhaoua',
-            'prenom' => 'Ikram',
-            'email' => 'ecom@shipily.ma',
-            'password' => $passwordGlobal,
-            'role' => 'ecommercant', 
-            'telephone' => '0667890123',
-            'statut' => true,
-        ]);
 
-        // 3️⃣ LE LIVREUR (Amine El Alami)
-        $livreur = Utilisateur::create([
-            'nom' => 'El Alami',
-            'prenom' => 'Amine',
-            'email' => 'livreur@shipily.ma',
-            'password' => $passwordGlobal,
-            'role' => 'livreur',
-            'telephone' => '0655443322',
-            'statut' => true,
-        ]);
 
         // =========================================================================
         // 📝 2. JOURNAL D'AUDIT (Pour garder une trace propre)

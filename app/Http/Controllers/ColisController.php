@@ -100,26 +100,41 @@ class ColisController extends Controller
             'statut' => $nouveauStatut,
         ]);
 
-        // 🎯 الـ Logic السحري عند التوصيل الناجح
-        if ($nouveauStatut === 'livre' && $ancienStatut !== 'livre') {
-            
-            // حددنا هنا الفيكس د التوصيل (مثلا 50 درهم)
-            $fraisLivraison = 50; 
-            $netEcommercant = $colis->prix - $fraisLivraison;
+        // 🎯 الـ Logic السحري عند التوصيل الناجح أو التراجع عن التوصيل
+        $fraisLivraison = 50; 
+        $netEcommercant = $colis->prix - $fraisLivraison;
 
-            // أ. البحث عن الـ Wallet ديال مول الكوليس (ecommercant) وزيادة الصافي ليه
+        if ($nouveauStatut === 'livre' && $ancienStatut !== 'livre') {
+            // أ. البحث عن أو إنشاء الـ Wallet ديال مول الكوليس (ecommercant) وزيادة الصافي ليه
+            $wallet = \App\Models\Wallet::firstOrCreate(
+                ['ecommercant_id' => $colis->ecommercant_id],
+                ['solde' => 0.00]
+            );
+
+            // زيادة الثمن ناقص 50 درهم للإيكوميرصان
+            $wallet->increment('solde', $netEcommercant);
+
+            // تسجيل العملية ف جدول الـ Transactions
+            \App\Models\Transaction::create([
+                'wallet_id' => $wallet->id,
+                'type'      => 'credit', 
+                'montant'   => $netEcommercant,
+                'description' => "Livraison réussie du colis " . $colis->code_suivi . " (Frais de livraison -50 DH)",
+            ]);
+        } elseif ($ancienStatut === 'livre' && $nouveauStatut !== 'livre') {
+            // ب. التراجع عن التوصيل الناجح: سحب الصافي من الـ Wallet
             $wallet = \App\Models\Wallet::where('ecommercant_id', $colis->ecommercant_id)->first();
 
             if ($wallet) {
-                // زيادة الثمن ناقص 50 درهم للإيكوميرصان
-                $wallet->increment('solde', $netEcommercant);
+                // نقصان الثمن ناقص 50 درهم من الإيكوميرصان
+                $wallet->decrement('solde', $netEcommercant);
 
                 // تسجيل العملية ف جدول الـ Transactions
                 \App\Models\Transaction::create([
                     'wallet_id' => $wallet->id,
-                    'type'      => 'credit', 
+                    'type'      => 'debit', 
                     'montant'   => $netEcommercant,
-                    'description' => "Livraison réussie du colis " . $colis->code_suivi . " (Frais de livraison -50 DH)",
+                    'description' => "Annulation/Correction de livraison du colis " . $colis->code_suivi . " (Ancien statut: livré)",
                 ]);
             }
         }
