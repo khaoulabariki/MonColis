@@ -14,13 +14,13 @@
         </div>
     </div>
 
-    {{-- 📊 Statistiques Rapides d'Affectation --}}
+    {{-- 📊 Statistiques Rapides --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between">
             <div>
                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">En attente d'affectation</span>
                 <h3 class="text-2xl font-black text-amber-600 tracking-tight">
-                    {{ \App\Models\Colis::where('statut', 'en_attente')->count() }} <span class="text-sm font-bold text-slate-400">Colis</span>
+                    {{ \App\Models\Colis::whereIn('statut', ['enregistre', 'en_attente', 'reçu'])->count() }} <span class="text-sm font-bold text-slate-400">Colis</span>
                 </h3>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shadow-sm">
@@ -53,6 +53,12 @@
         </div>
     </div>
 
+    {{-- Message Success --}}
+    @if(session('success'))
+        <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200/60 text-emerald-700 font-medium rounded-2xl text-sm flex items-center gap-2">
+            <i class="fas fa-check-circle text-emerald-500"></i> {{ session('success') }}
+        </div>
+    @endif
     
     <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-100/40 overflow-hidden">
         <div class="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/50">
@@ -74,30 +80,27 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-medium">
-                    {{-- جلب الكوليز اللي فانتظار التوزيع أولاً --}}
-                    @forelse(\App\Models\Colis::whereIn('statut', ['en_attente', 'reçu'])->orderBy('created_at', 'desc')->get() as $colis)
+                    {{-- التعديل هنا: كنقراو دابا من المتغير لي جاي من الكنترولر لي فيه حتى enregistre --}}
+                    @forelse($colis as $item)
                         <tr class="hover:bg-slate-50/40 transition">
-                            <td class="py-5 px-6 font-mono font-black text-[#0A4BB3] text-sm">#{{ $colis->code_suivi }}</td>
+                            <td class="py-5 px-6 font-mono font-black text-[#0A4BB3] text-sm">#{{ $item->code_suivi }}</td>
                             <td class="py-5 px-6 font-bold text-slate-800">
-                                @php $owner = \App\Models\Utilisateur::find($colis->ecommercant_id); @endphp
-                                {{ $owner->nom ?? 'Marchand' }} {{ $owner->prenom ?? '' }}
+                                {{ $item->ecommercant->nom ?? 'Marchand' }} {{ $item->ecommercant->prenom ?? '' }}
                             </td>
                             <td class="py-5 px-6 text-slate-500">
                                 <span class="bg-slate-100 px-2.5 py-1 rounded-lg text-xs text-slate-700 font-bold">
-                                    <i class="fas fa-map-marker-alt text-rose-500 mr-1"></i>{{ $colis->ville ?? 'Non spécifiée' }}
+                                    <i class="fas fa-map-marker-alt text-rose-500 mr-1"></i>{{ $item->adresse_destinataire ?? 'Non spécifiée' }}
                                 </span>
                             </td>
-                            <td class="py-5 px-6 font-black text-slate-900">{{ number_format($colis->prix, 2) }} DH</td>
+                            <td class="py-5 px-6 font-black text-slate-900">{{ number_format($item->prix, 2) }} DH</td>
                             
                             {{-- نموذج التعيين --}}
-                            <form action="{{ route('admin.affectations.store') }}" method="POST" class="m-0 p-0">
+                            <form action="{{ route('admin.affectations.store', $item->id) }}" method="POST" class="m-0 p-0">
                                 @csrf
-                                <input type="hidden" name="colis_id" value="{{ $colis->id }}">
-                                
                                 <td class="py-5 px-6">
                                     <select name="livreur_id" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-[#0A4BB3] rounded-xl text-xs font-bold text-slate-700 focus:outline-none transition appearance-none cursor-pointer">
                                         <option value="">Choisir un livreur...</option>
-                                        @foreach(\App\Models\Utilisateur::where('role', 'livreur')->get() as $livreur)
+                                        @foreach($livreurs as $livreur)
                                             <option value="{{ $livreur->id }}">{{ $livreur->nom }} {{ $livreur->prenom }}</option>
                                         @endforeach
                                     </select>

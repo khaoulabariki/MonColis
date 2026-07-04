@@ -36,6 +36,10 @@
                     <a href="{{ route('livreur.mes_livraisons') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-brand-blue transition-all">
                         <i class="fas fa-truck w-5 text-center text-sm"></i> Mes Livraisons
                     </a>
+
+                    <a href="{{ route('profil.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-brand-blue transition-all">
+                        <i class="fas fa-user-cog w-5 text-center text-sm"></i> Mon Profil
+                    </a>
                 </nav>
             </div>
 
@@ -58,7 +62,7 @@
                 
                 <div class="mb-8">
                     <h1 class="text-2xl font-black text-slate-900 tracking-tight">Tableau de bord</h1>
-                    <p class="text-xs font-medium text-slate-400 mt-1">Aperçu en temps réel de votre activité de livraison.</p>
+                    <p class="text-xs font-medium text-slate-400 mt-1">Aperçu en temps réel de votre activity de livraison.</p>
                 </div>
                 
                 <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-xs mb-8">
@@ -77,8 +81,17 @@
                         </div>
 
                         @php
-                            $totalCashEnMain = \App\Models\Colis::where('livreur_id', auth()->id())->where('statut', 'livre')->sum('prix');
-                            $totalCommissions = \App\Models\Colis::where('livreur_id', auth()->id())->where('statut', 'livre')->count() * 20;
+                            // 🎯 الحساب الصحيح والمصفى لي كياخد غي الكوليس لي مزال ماتكلوتراوش
+                            $totalCashEnMain = \App\Models\Colis::where('livreur_id', auth()->id())
+                                ->whereIn('statut', ['livre', 'Livré', 'livré', 'Livre'])
+                                ->where('encaissement_admin', false)
+                                ->sum('prix');
+
+                            $totalCommissions = \App\Models\Colis::where('livreur_id', auth()->id())
+                                ->whereIn('statut', ['livre', 'Livré', 'livré', 'Livre'])
+                                ->where('encaissement_admin', false)
+                                ->count() * 20;
+
                             $resteADonnerAdmin = $totalCashEnMain - $totalCommissions;
                         @endphp
 
@@ -133,7 +146,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 text-xs font-bold">
-                                @forelse(\App\Models\Colis::where('livreur_id', auth()->id())->where('statut', 'livre')->orderBy('updated_at', 'desc')->get() as $colisLivre)
+                                @forelse(\App\Models\Colis::where('livreur_id', auth()->id())->whereIn('statut', ['livre', 'Livré', 'cloture'])->orderBy('updated_at', 'desc')->get() as $colisLivre)
                                     <tr class="hover:bg-slate-50/40 transition">
                                         <td class="p-4 pl-6 font-black text-brand-blue">{{ $colisLivre->code_suivi }}</td>
                                         <td class="p-4 text-slate-700">{{ $colisLivre->nom_destinataire }} {{ $colisLivre->prenom_destinataire }}</td>
@@ -155,7 +168,5 @@
         </main>
 
     </div>
-   
-
 </body>
 </html>

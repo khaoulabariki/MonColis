@@ -14,16 +14,20 @@ class AffectationController extends Controller
      */
     public function index()
     {
-        // 1. Récupérer tous les colis enregistrés ou en cours
-        $colis = Colis::whereIn('statut', ['enregistre', 'en_cours'])->orderBy('created_at', 'desc')->get();
+        // 🎯 التعديل هنا: كنجيبو فقط الكوليس لي مازال ما تآفيكتاتش (statut = enregistre) 
+        // أو لي livreur_id ديالها باقى خاوية (null) باش غير تتآفيكتا تختفي من هاد الطابلو
+        $colis = Colis::where('statut', 'enregistre')
+                      ->whereNull('livreur_id')
+                      ->orderBy('created_at', 'desc')
+                      ->get();
 
-        // 2. CORRECTION : On nomme la variable $livreurs pour correspondre exactement au compact et au Blade
+        // 2. Récupérer les livreurs actifs
         $livreurs = Utilisateur::where('role', 'livreur')->where('statut', true)->get();
 
         // 3. Récupérer l'historique des affectations
         $affectationsList = Affectation::with(['colis', 'livreur'])->orderBy('created_at', 'desc')->get();
 
-        // Retourner la vue avec les variables exactes attendues par le fichier index.blade.php
+        // Retourner la vue avec les variables attendues
         return view('admin.affectations.index', compact('colis', 'livreurs', 'affectationsList'));
     }
 
@@ -38,6 +42,8 @@ class AffectationController extends Controller
 
         $colisActuel = Colis::findOrFail($id);
         
+        // هنا الكود كيبدل الـ statut لـ en_cours و كيعطيها الـ livreur_id
+        // وبفضل التعديل لي درنا الفوق، هاد الكوليس غاتختفي توماتيكياً من الطابلو فاش الصفحة دير ريفريش
         $colisActuel->update([
             'livreur_id' => $request->livreur_id,
             'statut'     => 'en_cours'

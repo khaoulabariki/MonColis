@@ -192,7 +192,7 @@
                     <input type="number" name="montant" id="montant" min="10" max="{{ $soldeDynamique ?? 0 }}" placeholder="Ex: 500" required
                            class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-blue font-black text-slate-800">
                 </div>
-                <p class="text-[10px] text-slate-400 font-medium mt-2">Le montant minimum de retrait est fixé à 10.00 DH.</p>
+                <p class="text-[10px] text-slate-400 font-medium mt-2">Le montant minimum de retrait est fixé à 100.00 DH.</p>
             </div>
 
             <div class="flex items-center gap-3 justify-end border-t border-slate-100 pt-4">

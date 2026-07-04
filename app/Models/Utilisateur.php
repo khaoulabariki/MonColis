@@ -31,6 +31,15 @@ class Utilisateur extends Authenticatable
 
     // --- RELATIONS ---
 
+    /**
+     * 🎯 RELATION ESSENTIELLE : Un utilisateur (e-commerçant) a un portefeuille virtuel (Wallet).
+     * C'est cette relation qui manquait et provoquait l'erreur 500 chez l'Admin.
+     */
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class, 'ecommercant_id', 'id');
+    }
+
     // Un utilisateur (e-commerçant) peut avoir plusieurs colis
     public function colisEcommercant()
     {
@@ -62,7 +71,7 @@ class Utilisateur extends Authenticatable
     }
 
     public function destinataires()
-{
-    return $this->hasMany(Destinataire::class, 'utilisateur_id');
-}
+    {
+        return $this->hasMany(Destinataire::class, 'utilisateur_id');
+    }
 }

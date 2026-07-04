@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 
 class UtilisateurController extends Controller
 {
+   
     /**
      * =========================================================================
      * 👥 SECTION : GESTION DES ADMINISTRATEURS
@@ -41,7 +42,6 @@ class UtilisateurController extends Controller
             'statut' => true
         ]);
 
-        // 📝 Log précis pour la création d'un Admin
         $this->logAction('CREATION_ADMIN', "L'administrateur a créé un nouveau compte administrateur : {$adminUser->nom} {$adminUser->prenom}.", 'ADMIN');
 
         return redirect()->route('admin.administrateurs.index')->with('success', 'Administrateur ajouté avec succès !');
@@ -49,13 +49,11 @@ class UtilisateurController extends Controller
 
     public function destroyAdmin($id)
     {
-        // On récupère les infos avant la suppression pour avoir un Log d'audit propre
         $user = Utilisateur::find($id);
         $nomComplet = $user ? "{$user->nom} {$user->prenom}" : "ID: {$id}";
 
         Utilisateur::where('id', $id)->delete();
 
-        // 📝 Log précis pour la suppression d'un Admin
         $this->logAction('SUPPRESSION_ADMIN', "L'administrateur a supprimé le compte de l'administrateur : {$nomComplet}.", 'ADMIN');
 
         return redirect()->route('admin.administrateurs.index')->with('success', 'Administrateur supprimé avec succès !');
@@ -93,7 +91,6 @@ class UtilisateurController extends Controller
             'statut' => true
         ]);
 
-        // 📝 Log précis pour la création d'un Livreur
         $this->logAction('CREATION_LIVREUR', "L'administrateur a créé un nouveau compte livreur : {$livreurUser->nom} {$livreurUser->prenom}.", 'LIVREUR');
 
         return redirect()->route('admin.livreurs.index')->with('success', 'Livreur ajouté avec succès !');
@@ -101,13 +98,11 @@ class UtilisateurController extends Controller
 
     public function destroyLivreur($id)
     {
-        // On récupère les infos avant la suppression pour le Log
         $user = Utilisateur::find($id);
         $nomComplet = $user ? "{$user->nom} {$user->prenom}" : "ID: {$id}";
 
         Utilisateur::where('id', $id)->delete();
 
-        // 📝 Log précis pour la suppression d'un Livreur (Fini le mot générique 'UTILISATEUR')
         $this->logAction('SUPPRESSION_LIVREUR', "L'administrateur a supprimé le compte du livreur : {$nomComplet}.", 'LIVREUR');
 
         return redirect()->route('admin.livreurs.index')->with('success', 'Livreur supprimé avec succès !');
@@ -150,7 +145,6 @@ class UtilisateurController extends Controller
             'solde' => 0.00
         ]);
 
-        // 📝 Log précis pour la création d'un E-commerçant
         $this->logAction('CREATION_ECOMMERCANT', "L'administrateur a créé un nouveau compte e-commerçant : {$utilisateur->nom} {$utilisateur->prenom} avec un portefeuille virtuel.", 'ECOMMERCANT');
 
         return redirect()->route('admin.ecommercants.index')->with('success', 'E-commerçant ajouté avec succès !');
@@ -158,15 +152,66 @@ class UtilisateurController extends Controller
 
     public function destroyEcom($id)
     {
-        // On récupère les infos avant la suppression pour le Log
         $user = Utilisateur::find($id);
         $nomComplet = $user ? "{$user->nom} {$user->prenom}" : "ID: {$id}";
 
         Utilisateur::where('id', $id)->delete();
 
-        // 📝 Log précis pour la suppression d'un E-commerçant
         $this->logAction('SUPPRESSION_ECOMMERCANT', "L'administrateur a supprimé le compte de l'e-commerçant : {$nomComplet}.", 'ECOMMERCANT');
 
         return redirect()->route('admin.ecommercants.index')->with('success', 'E-commerçant supprimé avec succès !');
+    }
+
+    /**
+     * ⚙️ SECTION : GESTION DU PROFIL (LIVREUR, ADMIN, ECOM)
+     */
+    public function editProfil()
+    {
+        $user = auth()->user();
+        return view('profil.edit', compact('user'));
+    }
+
+    public function updateProfil(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'telephone' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:utilisateurs,email,' . $user->id,
+            'password' => 'nullable|string|min:6|confirmed',
+        ]);
+
+        $data = [
+            'nom' => $request->nom,
+            'prenom' => $request->prenom,
+            'telephone' => $request->telephone,
+            'email' => $request->email,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        Utilisateur::where('id', $user->id)->update($data);
+
+        return redirect()->back()->with('success', 'Votre profil a été mis à jour avec succès !');
+    }
+
+    /**
+     * 📝 HELPER PROTECTED: تم التعديل من private إلى protected ليتوافق مع الـ Controller الأساسي
+     */
+    protected function logAction($action, $description, $targetType = 'SYSTEM')
+    {
+        if (class_exists('\App\Models\AuditLog')) {
+            AuditLog::create([
+                'utilisateur_id' => auth()->id() ?? null,
+                'action'         => $action,
+                'description'    => $description,
+                'target_type'    => $targetType,
+                'ip_address'     => request()->ip(),
+            ]);
+        }
     }
 }

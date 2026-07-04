@@ -37,6 +37,10 @@
                     <a href="{{ route('livreur.mes_livraisons') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black bg-blue-50 text-brand-blue transition-all">
                         <i class="fas fa-truck w-5 text-center text-sm"></i> Mes Livraisons
                     </a>
+
+                    <a href="{{ route('profil.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-brand-blue transition-all">
+                        <i class="fas fa-user-circle w-5 text-center text-sm"></i> Mon Profil
+                    </a>
                 </nav>
             </div>
 
@@ -46,7 +50,7 @@
                 </div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="w-full text-left flex items-center gap-2 px-2 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors">
+                    <button type="submit" class="w-full text-left flex items-center gap-2 px-2 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer">
                         <i class="fas fa-sign-out-alt w-4"></i>
                         Déconnexion
                     </button>
@@ -77,7 +81,7 @@
                                     <th class="p-4 pl-6">Code Suivi</th>
                                     <th class="p-4">Destinataire</th>
                                     <th class="p-4">Adresse</th>
-                                    <th class="p-4">Prix</th> {{-- 🆕 زدنا هاد العمود ف العنوان --}}
+                                    <th class="p-4">Prix</th>
                                     <th class="p-4">Statut</th>
                                     <th class="p-4 pr-6">Actions</th>
                                 </tr>
@@ -89,7 +93,7 @@
                                     <td class="p-4 pl-6 font-black text-brand-blue font-mono">{{ $c->code_suivi }}</td>
                                     <td class="p-4 text-slate-900">{{ $c->prenom_destinataire }} {{ $c->nom_destinataire }}</td>
                                     <td class="p-4 text-slate-500 font-medium max-w-xs truncate">{{ $c->adresse_destinataire }}</td>
-                                    <td class="p-4 text-slate-900 font-mono font-black text-emerald-600">{{ number_format($c->prix, 2) }} DH</td> {{-- 🆕 زدنا الثمن هنا ب صيغة أنيقة --}}
+                                    <td class="p-4 text-slate-900 font-mono font-black text-emerald-600">{{ number_format($c->prix, 2) }} DH</td>
                                     <td class="p-4">
                                         @php
                                             $colors = [
@@ -118,7 +122,7 @@
                                     </td>
                                     <td class="p-4 pr-6">
                                         @if($c->statut !== 'livre' && $c->statut !== 'retourne')
-                                        <form method="POST" action="{{ route('livreur.colis.statut', $c->id) }}">
+                                        <form method="POST" action="{{ route('livreur.colis.statut', ['id' => $c->id]) }}">
                                             @csrf
                                             @method('PUT')
                                             <div class="flex items-center gap-2">
@@ -141,7 +145,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="p-12 text-center text-slate-400 font-medium"> {{-- رجعناها 6 بلاصة 5 حيت تزاد عمود --}}
+                                    <td colspan="6" class="p-12 text-center text-slate-400 font-medium">
                                         <div class="text-slate-300 text-2xl mb-2"><i class="fas fa-box-open"></i></div>
                                         Aucune livraison affectée pour le moment.
                                     </td>

@@ -4,88 +4,96 @@ namespace App\Http\Controllers;
 
 use App\Models\Retrait;
 use App\Models\Wallet;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RetraitController extends Controller
 {
     /**
-     * Créer une demande de retrait de fonds (Par le E-commerçant).
+     * 🟢 1. Créer une demande de retrait (E-commerçant)
+     * Déduit le solde immédiatement et répond en JSON si la requête est en AJAX.
      */
     public function demanderRetrait(Request $request)
     {
-        // Validation des données d'entrée
+        // 🎯 Validation avec messages d'erreur personnalisés en Français
         $request->validate([
             'ecommercant_id' => 'required|exists:utilisateurs,id',
-            'montant' => 'required|numeric|min:10'
+            'montant' => 'required|numeric|min:100'
+        ], [
+            'montant.min' => 'Le montant doit être au moins 100.',
+            'montant.numeric' => 'Le montant doit être un nombre valide.',
+            'montant.required' => 'Le montant est obligatoire.'
         ]);
 
-        // Vérifier si le solde du portefeuille est suffisant pour le retrait
         $wallet = Wallet::where('ecommercant_id', $request->ecommercant_id)->firstOrFail();
-        if ($wallet->solde < $request->montant) {
-            return response()->json(['message' => 'Solde insuffisant pour effectuer ce retrait'], 400);
+        
+        if ((float)$wallet->solde < (float)$request->montant) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => 'Solde insuffisant pour effectuer ce retrait !'], 422);
+            }
+            return redirect()->back()->with('error', 'Solde insuffisant pour effectuer ce retrait !');
         }
 
-        // Création de la demande avec le statut 'en_attente'
+        // 📉 Déduction immédiate du solde pour cohérence visuelle chez le marchand
+        DB::table('wallets')
+            ->where('ecommercant_id', $request->ecommercant_id)
+            ->decrement('solde', $request->montant);
+
         $retrait = Retrait::create([
             'ecommercant_id' => $request->ecommercant_id,
             'montant' => $request->montant,
             'statut' => 'en_attente'
         ]);
 
-        return response()->json(['message' => 'Demande de retrait enregistrée avec succès', 'retrait' => $retrait], 201);
+        // ✨ Réponse JSON si la requête provient d'un script AJAX (évite l'erreur rouge du Modal)
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Votre demande a été enregistrée et le solde mis à jour !',
+                'retrait' => $retrait
+            ], 200);
+        }
+
+        return redirect()->back()->with('success', 'Votre demande a été enregistrée et le solde mis à jour !');
     }
-/**
-     * Traiter la demande de retrait (Par l'Admin : Valider ou Rejeter).
+
+    /**
+     * 🔵 2. Traiter la demande de retrait (Admin : Valider ou Rejeter)
+     * Valide définitivement l'action ou ré-incrémente le solde en cas de rejet.
      */
     public function traiterRetrait(Request $request, $id)
     {
-        // Validation du nouveau statut
         $request->validate([
             'statut' => 'required|in:valide,rejete'
         ]);
 
         $retrait = Retrait::findOrFail($id);
         
-        // Empêcher de traiter une demande déjà validée ou rejetée
         if ($retrait->statut !== 'en_attente') {
-            // Si la requête vient du formulaire HTML, on redirige avec un message d'erreur
-            if (!$request->expectsJson()) {
-                return redirect()->route('admin.finances.index')->with('error', 'Cette demande a déjà été traitée.');
-            }
-            return response()->json(['message' => 'Cette demande a déjà été traitée'], 400);
+            return redirect()->back()->with('error', 'Cette demande a déjà été traitée.');
         }
 
-        // Si l'admin valide le retrait, on déduit l'argent du portefeuille
-        if ($request->statut === 'valide') {
-            $wallet = Wallet::where('ecommercant_id', $retrait->ecommercant_id)->firstOrFail();
-            
-            // Vérifier une dernière fois si le solde est suffisant avant de déduire
-            if ($wallet->solde < $retrait->montant) {
-                if (!$request->expectsJson()) {
-                    return redirect()->route('admin.finances.index')->with('error', 'Solde insuffisant pour ce marchand.');
-                }
-                return response()->json(['message' => 'Solde insuffisant'], 400);
+        // 🔄 Si l'admin rejette la demande, on restitue l'argent sur le solde du marchand
+        if ($request->statut === 'rejete') {
+            DB::table('wallets')
+                ->where('ecommercant_id', $retrait->ecommercant_id)
+                ->increment('solde', $retrait->montant);
+        } else {
+            // Si validé, on enregistre formellement la transaction financière finale
+            $wallet = Wallet::where('ecommercant_id', $retrait->ecommercant_id)->first();
+            if ($wallet) {
+                Transaction::create([
+                    'wallet_id'   => $wallet->id,
+                    'montant'     => $retrait->montant,
+                    'type'        => 'debit',
+                    'description' => "Retrait validé pour le marchand #{$retrait->ecommercant_id}"
+                ]);
             }
-
-            // Déduire le montant du solde de l'e-commerçant
-            $wallet->decrement('solde', $retrait->montant);
-
-            // Enregistrer une transaction financière de type 'debit'
-            $wallet->transactions()->create([
-                'type' => 'debit',
-                'montant' => $retrait->montant,
-                'description' => 'Retrait de fonds validé par l\'administration (ID de retrait : ' . $retrait->id . ')'
-            ]);
         }
 
-        // Mise à jour du statut de la demande
         $retrait->update(['statut' => $request->statut]);
 
-        // Redirection propre vers la page des finances avec un message de succès
-        if (!$request->expectsJson()) {
-            return redirect()->route('admin.finances.index')->with('success', 'La demande de retrait a été mise à jour avec succès !');
-        }
-
-        return response()->json(['message' => 'Demande de retrait mise à jour : ' . $request->statut, 'retrait' => $retrait]);
+        return redirect()->back()->with('success', 'Le statut a été mis à jour avec succès !');
     }
 }

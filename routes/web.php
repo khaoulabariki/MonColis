@@ -25,12 +25,10 @@ use App\Http\Controllers\TransactionController;
 |--------------------------------------------------------------------------
 */
 
-// Redirection de l'URL racine vers la page de suivi public
 Route::get('/', function () {
     return redirect('/tracking');
 });
 
-// Page d'accueil principale et système de suivi public des colis
 Route::get('/tracking', function (Request $request) {
     $code = $request->query('code');
     $colis = null;
@@ -42,7 +40,6 @@ Route::get('/tracking', function (Request $request) {
     return view('welcome', compact('colis', 'code'));
 });
 
-// 🎯 ROUTE POUR LA PAGE CONTACT (Située dans views/auth/contact.blade.php)
 Route::get('/contact', function () {
     return view('auth.contact');
 })->name('contact');
@@ -51,18 +48,13 @@ Route::post('/contact', function (Illuminate\Http\Request $request) {
     return redirect()->back()->with('success', 'Votre message a été envoyé avec succès à l\'administration !');
 })->name('contact.post');
 
-// Routes de gestion de l'authentification (Affichage, Connexion, Déconnexion)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
-/* 👥 NOUVELLES ROUTES : INSCRIPTION AUTONOME (E-COMMERÇANT & LIVREUR) */
-// Affichage du formulaire d'inscription
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-// Traitement des données du formulaire et création du compte dans la BDD
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
-// Suivi public via un jeton unique et dépôt d'avis clients
 Route::get('/suivi/{token}', [ColisController::class, 'tracking'])->name('tracking.public');
 Route::post('/suivi/{token}/avis', [AvisController::class, 'store'])->name('avis.store');
 
@@ -73,7 +65,6 @@ Route::post('/suivi/{token}/avis', [AvisController::class, 'store'])->name('avis
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
    
-    // 1. Tableau de bord principal avec Analyseur d'Avis IA + Liste Globale des Avis
     Route::get('/dashboard', function() {
         $totalColis = Colis::count() ?? 0;
         $livres = Colis::where('statut', 'Livré')->count() ?? 0; 
@@ -81,9 +72,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         $retournes = Colis::where('statut', 'Retourné')->count() ?? 0;
         $annules = Colis::where('statut', 'Annulé')->count() ?? 0; 
 
-       
-        $recentAvis = \App\Models\Avis::with('colis')->orderBy('created_at', 'desc')->get();
+        // 🎯 جلب إجمالي السولد ديال كاع الـ Wallets ف السيستيم باش يبان عند الـ Admin
+        $totalEcomWallets = \App\Models\Wallet::sum('solde') ?? 0;
 
+        $recentAvis = \App\Models\Avis::with('colis')->orderBy('created_at', 'desc')->get();
         $allFeedbacks = Avis::pluck('commentaire')->toArray() ?? []; 
         $totalAvis = count($allFeedbacks);
         $positifs = 0;
@@ -94,11 +86,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
             }
         }
 
-       
         $tauxSatisfaction = $totalAvis > 0 ? round(($positifs / $totalAvis) * 100) : 0;
         
         if ($totalAvis == 0) {
-           
             $iaResume = "Aucune donnée disponible pour le moment (0 avis).";
             $iaStatus = "Aucun Avis";
             $iaColor = "bg-gray-500/10 text-gray-400 border-gray-500/20";
@@ -118,57 +108,48 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
         return view('admin.dashboard', compact(
             'totalColis', 'livres', 'enCours', 'retournes', 'annules',
-            'tauxSatisfaction', 'iaResume', 'iaStatus', 'iaColor', 'totalAvis', 'recentAvis'
+            'tauxSatisfaction', 'iaResume', 'iaStatus', 'iaColor', 'totalAvis', 'recentAvis', 'totalEcomWallets'
         ));
     })->name('dashboard');
 
-    // 2. Affichage de la liste globale des colis
     Route::get('/colis', function () {
         $colisList = Colis::with('livreur')->orderBy('created_at', 'desc')->get();
         $ecommercants = collect([]); 
         $mode = 'liste';
         $colisEnCours = null;
-
         return view('admin.colis.index', compact('colisList', 'ecommercants', 'mode', 'colisEnCours'));
     })->name('colis.index');
 
-    // 3. Formulaire de création d'un nouveau colis
     Route::get('/colis/creer', function () {
         $colisList = Colis::orderBy('created_at', 'desc')->get();
         $ecommercants = Utilisateur::where('role', 'ecommercant')->get();
         $mode = 'creation'; 
         $colisEnCours = null;
-
         return view('admin.colis.index', compact('colisList', 'ecommercants', 'mode', 'colisEnCours'));
     })->name('colis.create');
 
-    // 4. Gestion des opérations financières (Traitée par TransactionController et RetraitController)
     Route::get('/finances', [TransactionController::class, 'index'])->name('finances.index');
-    Route::post('/finances/retrait/{id}/valider', [RetraitController::class, 'traiterRetrait'])->name('finances.valider');
-
-    // 5. GESTION DES UTILISATEURS
     
-    // --- SECTION : ADMINISTRATEURS ---
+    // 🎯 التصحيح السحري والربط المتناسق $100% مع الـ Form د الـ Blade والـ Controller
+    Route::post('/finances/valider/{id}', [RetraitController::class, 'traiterRetrait'])->name('finances.valider');
+
+    // --- SECTIONS UTILISATEURS ---
     Route::get('/administrateurs', [UtilisateurController::class, 'indexAdmin'])->name('administrateurs.index');
     Route::post('/administrateurs/store', [UtilisateurController::class, 'storeAdmin'])->name('administrateurs.store');
     Route::delete('/administrateurs/{id}/supprimer', [UtilisateurController::class, 'destroyAdmin'])->name('administrateurs.destroy');
 
-    // --- SECTION : LIVREURS ---
     Route::get('/livreurs', [UtilisateurController::class, 'indexLivreur'])->name('livreurs.index');
     Route::post('/livreurs/store', [UtilisateurController::class, 'storeLivreur'])->name('livreurs.store');
     Route::delete('/livreurs/{id}/supprimer', [UtilisateurController::class, 'destroyLivreur'])->name('livreurs.destroy');
 
-    // --- SECTION : E-COMMERÇANTS ---
     Route::get('/ecommercants', [UtilisateurController::class, 'indexEcom'])->name('ecommercants.index');
     Route::post('/ecommercants/store', [UtilisateurController::class, 'storeEcom'])->name('ecommercants.store');
     Route::delete('/ecommercants/{id}/supprimer', [UtilisateurController::class, 'destroyEcom'])->name('ecommercants.destroy');
 
-    // 6. Gestion et suivi des affectations de colis aux livreurs
     Route::get('/affectations', [AffectationController::class, 'index'])->name('affectations.index');
     Route::post('/affectations/{id}', [AffectationController::class, 'store'])->name('affectations.store');
 
-    // 7. Journaux et logs d'audit du système informatique
-    Route::get('/audit', [\App\Http\Controllers\AuditLogController::class, 'index'])->name('audit.index');
+    Route::get('/audit', [AuditLogController::class, 'index'])->name('audit.index');
 });
 
 /*
@@ -176,13 +157,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 | Routes Autonomes de Gestion des Colis (Espace Admin)
 |--------------------------------------------------------------------------
 */
-
 Route::get('/admin/colis/{id}/modifier', function ($id) {
     $colisList = Colis::orderBy('created_at', 'desc')->get();
     $ecommercants = Utilisateur::where('role', 'ecommercant')->get();
     $colisEnCours = Colis::find($id);
     $mode = 'creation'; 
-
     return view('admin.colis.index', compact('colisList', 'ecommercants', 'mode', 'colisEnCours'));
 })->name('admin.colis.edit');
 
@@ -233,9 +212,8 @@ Route::delete('/admin/colis/{id}/supprimer', function ($id) {
     return redirect()->route('admin.colis.index')->with('success', 'Colis supprimé avec succès !');
 })->name('admin.colis.destroy');
 
-
-// Route pour clôturer la caisse d'un livreur
 Route::post('/admin/finances/cloturer/{livreur_id}', [TransactionController::class, 'cloturerLivreur'])->name('admin.finances.cloturer');
+
 /*
 |--------------------------------------------------------------------------
 | Espace E-commerçant (Protégé par Auth et le rôle ecommercant)
@@ -243,14 +221,12 @@ Route::post('/admin/finances/cloturer/{livreur_id}', [TransactionController::cla
 */
 Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ecommercant.')->group(function () {
     
-    // Dashboard E-commerçant مع جلب التعليقات الخاصة بسلعتو فقط
     Route::get('/dashboard', function () {
         $totalColis = Colis::where('ecommercant_id', auth()->id())->count();
         $livres = Colis::where('ecommercant_id', auth()->id())->where('statut', 'Livré')->count();
         $enCours = Colis::where('ecommercant_id', auth()->id())->where('statut', 'En cours')->count();
         $retournes = Colis::where('ecommercant_id', auth()->id())->where('statut', 'Retourné')->count();
 
-        // 🎯 جلب التعليقات المرتبطة بكوليس هاد الإيكوميرس فقط
         $recentAvis = \App\Models\Avis::whereHas('colis', function($query) {
             $query->where('ecommercant_id', auth()->id());
         })->with('colis')->orderBy('created_at', 'desc')->get();
@@ -262,19 +238,15 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
     Route::post('/finances/retrait', [RetraitController::class, 'demanderRetrait'])->name('retrait.store');
 
     Route::get('/colis', function () {
-        $colis = \App\Models\Colis::where('ecommercant_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->get();
-            
+        $colis = \App\Models\Colis::where('ecommercant_id', auth()->id())->orderBy('created_at', 'desc')->get();
         return view('ecommercant.colis.index', compact('colis'));
     })->name('colis.index');
     
-    Route::post('/colis', [\App\Http\Controllers\ColisController::class, 'store'])->name('colis.store');
+    Route::post('/colis', [ColisController::class, 'store'])->name('colis.store');
     Route::get('/colis/creer', function () {
         return view('ecommercant.colis.create');
     })->name('colis.create');
 
-    // ✨ GESTION DES DESTINATAIRES (Ecommercant Space) ✨
     Route::get('/destinataires', function () {
         $destinataires = auth()->user()->destinataires()->latest()->get();
         return view('ecommercant.destinataires.index', compact('destinataires'));
@@ -308,15 +280,13 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:livreur'])->prefix('livreur')->name('livreur.')->group(function () {
-    Route::put('/colis/{id}/statut', [\App\Http\Controllers\ColisController::class, 'updateStatut'])->name('colis.statut');
+    Route::put('/colis/{id}/statut', [ColisController::class, 'updateStatut'])->name('colis.statut');
     
-    // Dashboard Livreur مع جلب التعليقات لي خلاو ليه الكليان على التوصيل ديالو
     Route::get('/dashboard', function () {
         $colisCount = Affectation::where('livreur_id', auth()->id())
             ->whereIn('statut', ['en_attente', 'en_cours'])
             ->count();
             
-        // 🎯 جلب التعليقات المرتبطة بالكوليس لي وصّلها هاد الليفرور بالظبط
         $recentAvis = \App\Models\Avis::whereHas('colis', function($query) {
             $query->where('livreur_id', auth()->id());
         })->with('colis')->orderBy('created_at', 'desc')->get();
@@ -336,7 +306,7 @@ Route::middleware(['auth', 'role:livreur'])->prefix('livreur')->name('livreur.')
 
 /*
 |--------------------------------------------------------------------------
-| Route Temporaire de Génération / Réinitialisation du Compte de Test
+| Route Temporaire de Génération
 |--------------------------------------------------------------------------
 */
 Route::get('/create-ecom', function () {
@@ -361,4 +331,14 @@ Route::get('/create-ecom', function () {
     ]);
     
     return "Compte de test E-commerçant créé avec succès !";
+}); 
+
+/*
+|--------------------------------------------------------------------------
+| ⚙️ Routes Unifiées pour la Gestion du Profil
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/mon-profil', [UtilisateurController::class, 'editProfil'])->name('profil.edit');
+    Route::post('/mon-profil/update', [UtilisateurController::class, 'updateProfil'])->name('profil.update');
 });
