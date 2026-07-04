@@ -67,10 +67,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
    
     Route::get('/dashboard', function() {
         $totalColis = Colis::count() ?? 0;
-        $livres = Colis::where('statut', 'Livré')->count() ?? 0; 
-        $enCours = Colis::where('statut', 'En cours')->count() ?? 0;
-        $retournes = Colis::where('statut', 'Retourné')->count() ?? 0;
-        $annules = Colis::where('statut', 'Annulé')->count() ?? 0; 
+        $livres = Colis::whereIn('statut', ['livre', 'Livré', 'livré', 'Livre'])->count() ?? 0; 
+        $enCours = Colis::whereIn('statut', ['en_cours', 'En cours', 'En Cours'])->count() ?? 0;
+        $retournes = Colis::whereIn('statut', ['retourne', 'Retourné', 'retourné'])->count() ?? 0;
+        
+        $revenueAgency = ($livres + $retournes) * 30; // Bénéfice net (50 DH payé par e-com - 20 DH donné au livreur)
+        
+        $annules = Colis::whereIn('statut', ['annule', 'Annulé', 'annulé'])->count() ?? 0; 
 
         // 🎯 جلب إجمالي السولد ديال كاع الـ Wallets ف السيستيم باش يبان عند الـ Admin
         $totalEcomWallets = \App\Models\Wallet::sum('solde') ?? 0;
@@ -108,7 +111,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
         return view('admin.dashboard', compact(
             'totalColis', 'livres', 'enCours', 'retournes', 'annules',
-            'tauxSatisfaction', 'iaResume', 'iaStatus', 'iaColor', 'totalAvis', 'recentAvis', 'totalEcomWallets'
+            'tauxSatisfaction', 'iaResume', 'iaStatus', 'iaColor', 'totalAvis', 'recentAvis', 'totalEcomWallets', 'revenueAgency'
         ));
     })->name('dashboard');
 
@@ -223,9 +226,9 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
     
     Route::get('/dashboard', function () {
         $totalColis = Colis::where('ecommercant_id', auth()->id())->count();
-        $livres = Colis::where('ecommercant_id', auth()->id())->where('statut', 'Livré')->count();
-        $enCours = Colis::where('ecommercant_id', auth()->id())->where('statut', 'En cours')->count();
-        $retournes = Colis::where('ecommercant_id', auth()->id())->where('statut', 'Retourné')->count();
+        $livres = Colis::where('ecommercant_id', auth()->id())->whereIn('statut', ['livre', 'Livré', 'livré', 'Livre'])->count();
+        $enCours = Colis::where('ecommercant_id', auth()->id())->whereIn('statut', ['en_cours', 'En cours', 'En Cours'])->count();
+        $retournes = Colis::where('ecommercant_id', auth()->id())->whereIn('statut', ['retourne', 'Retourné', 'retourné'])->count();
 
         $recentAvis = \App\Models\Avis::whereHas('colis', function($query) {
             $query->where('ecommercant_id', auth()->id());

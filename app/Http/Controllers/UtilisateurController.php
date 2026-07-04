@@ -208,9 +208,11 @@ class UtilisateurController extends Controller
             AuditLog::create([
                 'utilisateur_id' => auth()->id() ?? null,
                 'action'         => $action,
-                'description'    => $description,
-                'target_type'    => $targetType,
-                'ip_address'     => request()->ip(),
+                'entite'         => $targetType,
+                'donnees_apres'  => [
+                    'description' => $description,
+                    'ip_address'  => request()->ip()
+                ],
             ]);
         }
     }

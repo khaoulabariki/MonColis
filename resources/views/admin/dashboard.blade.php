@@ -43,7 +43,7 @@
     }
 @endphp
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-10">
     
     <div class="bg-[#0A4BB3] text-white p-7 rounded-3xl shadow-lg shadow-blue-900/10 flex flex-col justify-between min-h-[210px]">
         <div>
@@ -118,6 +118,25 @@
             <div class="bg-white w-full h-3 rounded-xs"></div>
             <div class="bg-white w-full h-5 rounded-xs"></div>
             <div class="bg-white w-full h-9 rounded-xs bg-white/90"></div>
+        </div>
+    </div>
+    
+    <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white p-7 rounded-3xl shadow-lg shadow-indigo-950/20 flex flex-col justify-between min-h-[210px]">
+        <div>
+            <div class="flex justify-between items-center mb-5">
+                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white"><i class="fas fa-hand-holding-usd text-sm"></i></div>
+                <span class="text-[10px] font-bold bg-white/20 px-2.5 py-1 rounded-full text-emerald-400 tracking-wide">Net</span>
+            </div>
+            <span class="text-3xl font-black tracking-tight block mb-1.5">{{ number_format($revenueAgency ?? 0, 2) }} <span class="text-sm font-bold text-indigo-300">DH</span></span>
+            <span class="text-[10px] font-black tracking-wider uppercase text-indigo-200">Revenu Net Agence</span>
+        </div>
+        <div class="flex items-end gap-2 h-8 mt-5 opacity-40">
+            <div class="bg-white w-full h-6 rounded-xs"></div>
+            <div class="bg-white w-full h-8 rounded-xs"></div>
+            <div class="bg-white w-full h-5 rounded-xs"></div>
+            <div class="bg-white w-full h-9 rounded-xs"></div>
+            <div class="bg-white w-full h-7 rounded-xs"></div>
+            <div class="bg-white w-full h-10 rounded-xs bg-white/90"></div>
         </div>
     </div>
 

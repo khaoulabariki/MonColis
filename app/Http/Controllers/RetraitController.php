@@ -65,7 +65,7 @@ class RetraitController extends Controller
             return response()->json(['message' => 'Cette demande a déjà été traitée'], 400);
         }
 
-        // Si l'admin valide le retrait, on déduit l'argent du portefeuille
+        // Si l'admin valide le retrait, on vérifie si le solde est suffisant
         if ($request->statut === 'valide') {
             $wallet = Wallet::firstOrCreate(
                 ['ecommercant_id' => $retrait->ecommercant_id],
@@ -79,19 +79,9 @@ class RetraitController extends Controller
                 }
                 return response()->json(['message' => 'Solde insuffisant'], 400);
             }
-
-            // Déduire le montant du solde de l'e-commerçant
-            $wallet->decrement('solde', $retrait->montant);
-
-            // Enregistrer une transaction financière de type 'debit'
-            $wallet->transactions()->create([
-                'type' => 'debit',
-                'montant' => $retrait->montant,
-                'description' => 'Retrait de fonds validé par l\'administration (ID de retrait : ' . $retrait->id . ')'
-            ]);
         }
 
-        // Mise à jour du statut de la demande
+        // Mise à jour du statut de la demande (Le hook dans le modèle Retrait s'occupera de la déduction)
         $retrait->update(['statut' => $request->statut]);
 
         // Redirection propre vers la page des finances avec un message de succès

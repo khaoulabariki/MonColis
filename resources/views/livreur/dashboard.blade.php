@@ -88,7 +88,7 @@
                                 ->sum('prix');
 
                             $totalCommissions = \App\Models\Colis::where('livreur_id', auth()->id())
-                                ->whereIn('statut', ['livre', 'Livré', 'livré', 'Livre'])
+                                ->whereIn('statut', ['livre', 'Livré', 'livré', 'Livre', 'retourne', 'Retourné', 'retourné'])
                                 ->where('encaissement_admin', false)
                                 ->count() * 20;
 

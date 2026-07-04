@@ -22,7 +22,7 @@
             <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
                     <p class="text-gray-500">Code de suivi</p>
-                    <p class="font-mono font-bold text-indigo-600">{{ $colis->code_suivi }}</p>
+                    <p class="font-mono font-bold text-brand-blue">{{ $colis->code_suivi }}</p>
                 </div>
                 <div>
                     <p class="text-gray-500">Destinataire</p>
@@ -81,7 +81,7 @@
                         </p>
                     </div>
                     @if($actif)
-                        <span class="text-indigo-600 text-sm font-medium">✓</span>
+                        <span class="text-brand-blue text-sm font-medium">✓</span>
                     @endif
                 </div>
                 @if(!$loop->last)
@@ -115,7 +115,7 @@
                         placeholder="Votre avis sur la livraison..."></textarea>
                 </div>
                 <button type="submit"
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg">
+                    class="w-full text-brand-blue hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg">
                     Envoyer mon avis
                 </button>
             </form>
