@@ -34,6 +34,13 @@ class TransactionController extends Controller
     public function cloturerLivreur(Request $request, $livreur_id)
     {
         $livreur = Utilisateur::where('id', $livreur_id)->where('role', 'livreur')->firstOrFail();
+        
+        // Mettre à jour tous les colis livrés et retournés pour ce livreur
+        \App\Models\Colis::where('livreur_id', $livreur_id)
+            ->whereIn('statut', ['livre', 'Livré', 'livré', 'Livre', 'retourne', 'Retourné', 'retourné'])
+            ->where('encaissement_admin', false)
+            ->update(['encaissement_admin' => true]);
+
         return redirect()->back()->with('success', "La clôture financière pour le livreur {$livreur->nom} {$livreur->prenom} a été effectuée !");
     }
 }

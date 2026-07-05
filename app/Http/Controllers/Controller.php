@@ -25,7 +25,7 @@ class Controller extends BaseController
             AuditLog::create([
                 'utilisateur_id' => $userId,
                 'action'         => $action,
-                'description'    => $description,
+                'donnees_apres'  => ['description' => $description],
                 'entite'         => $entite, 
                 'created_at'     => now()
             ]);

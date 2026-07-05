@@ -137,6 +137,35 @@ class ColisController extends Controller
                     'description' => "Annulation/Correction de livraison du colis " . $colis->code_suivi . " (Ancien statut: livré)",
                 ]);
             }
+        } elseif ($nouveauStatut === 'retourne' && $ancienStatut !== 'retourne') {
+            // ج. حالة الروتور: اقتطاع 50 درهم (تكلفة الخدمة رغم عدم التسليم)
+            $wallet = \App\Models\Wallet::firstOrCreate(
+                ['ecommercant_id' => $colis->ecommercant_id],
+                ['solde' => 0.00]
+            );
+
+            $wallet->decrement('solde', 50);
+
+            \App\Models\Transaction::create([
+                'wallet_id' => $wallet->id,
+                'type'      => 'debit', 
+                'montant'   => 50,
+                'description' => "Frais de service pour le retour du colis " . $colis->code_suivi,
+            ]);
+        } elseif ($ancienStatut === 'retourne' && $nouveauStatut !== 'retourne') {
+            // د. إلغاء الروتور: إرجاع 50 درهم لي تقطعات
+            $wallet = \App\Models\Wallet::where('ecommercant_id', $colis->ecommercant_id)->first();
+
+            if ($wallet) {
+                $wallet->increment('solde', 50);
+
+                \App\Models\Transaction::create([
+                    'wallet_id' => $wallet->id,
+                    'type'      => 'credit', 
+                    'montant'   => 50,
+                    'description' => "Remboursement des frais suite à l'annulation du retour du colis " . $colis->code_suivi,
+                ]);
+            }
         }
 
         // 4. الرجوع مع ميساج نجاح

@@ -60,7 +60,7 @@ class AvisController extends Controller
         AuditLog::create([
          'utilisateur_id' => $colis->ecommercant_id, // Lié à l'éco-commerçant propriétaire du colis pour le suivi
          'action'         => 'ANALYSE_IA',
-         'description'    => "L'IA a analysé un nouvel avis pour le colis {$colis->code_suivi}. Sentiment détecté : " . strtoupper($sentiment),
+         'donnees_apres'  => ['description' => "L'IA a analysé un nouvel avis pour le colis {$colis->code_suivi}. Sentiment détecté : " . strtoupper($sentiment)],
          'entite'        => 'SYSTÈME',
          'created_at'     => now()
       ]);

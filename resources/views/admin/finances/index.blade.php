@@ -27,10 +27,17 @@
     @endif
 
     @php
-        $colisNonClotures = \App\Models\Colis::where('encaissement_admin', false)->get();
-        $totalColisEnAttente = $colisNonClotures->count();
-        $cashEnAttenteGlobal = $colisNonClotures->sum('prix');
-        $gainsLivreursEnAttente = $totalColisEnAttente * 20; 
+        $colisLivresGlobal = \App\Models\Colis::where('encaissement_admin', false)
+            ->whereIn('statut', ['livre', 'Livré', 'livré', 'Livre'])
+            ->get();
+            
+        $colisRetournesGlobal = \App\Models\Colis::where('encaissement_admin', false)
+            ->whereIn('statut', ['retourne', 'Retourné', 'retourné'])
+            ->get();
+            
+        $totalColisEnAttente = $colisLivresGlobal->count() + $colisRetournesGlobal->count();
+        $cashEnAttenteGlobal = $colisLivresGlobal->sum('prix'); // Cash only from delivered
+        $gainsLivreursEnAttente = $totalColisEnAttente * 20; // Commission on both delivered and returned
         $netAdminEnAttente = $cashEnAttenteGlobal - $gainsLivreursEnAttente; 
     @endphp
 
@@ -174,10 +181,19 @@
                 <tbody class="divide-y divide-slate-100 font-medium">
                     @forelse(\App\Models\Utilisateur::where('role', 'livreur')->get() as $livreur)
                         @php
-                            $colisActifsQuery = \App\Models\Colis::where('livreur_id', $livreur->id)->where('encaissement_admin', false)->get();
-                            $colisLivreCount = $colisActifsQuery->count();
-                            $cashEnPoche = $colisActifsQuery->sum('prix');
-                            $rba7LivreurActuel = $colisLivreCount * 20; 
+                            $colisLivresQuery = \App\Models\Colis::where('livreur_id', $livreur->id)
+                                ->whereIn('statut', ['livre', 'Livré', 'livré', 'Livre'])
+                                ->where('encaissement_admin', false)
+                                ->get();
+                                
+                            $colisRetournesQuery = \App\Models\Colis::where('livreur_id', $livreur->id)
+                                ->whereIn('statut', ['retourne', 'Retourné', 'retourné'])
+                                ->where('encaissement_admin', false)
+                                ->get();
+
+                            $colisLivreCount = $colisLivresQuery->count() + $colisRetournesQuery->count();
+                            $cashEnPoche = $colisLivresQuery->sum('prix'); // L'argent liquide n'est que sur les colis livrés
+                            $rba7LivreurActuel = $colisLivreCount * 20; // 20 DH par colis traité (livré ou retourné)
                             $resteAVerserAdmin = $cashEnPoche - $rba7LivreurActuel;
                         @endphp
                         <tr class="hover:bg-slate-50/50 transition">

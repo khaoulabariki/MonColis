@@ -96,7 +96,7 @@
                 <tbody class="divide-y divide-slate-100 font-medium">
                     @forelse(\App\Models\Colis::where('ecommercant_id', auth()->id())->where('statut', 'livre')->orderBy('updated_at', 'desc')->get() as $colisEcom)
                         <tr class="hover:bg-slate-50/50 transition">
-                            <td class="p-4 font-semibold text-indigo-600">#{{ $colisEcom->code_suivi }}</td>
+                            <td class="p-4 font-semibold text-brand-blue">#{{ $colisEcom->code_suivi }}</td>
                             <td class="p-4 text-slate-700">
                                 <div class="font-semibold">{{ $colisEcom->nom_destinataire }} {{ $colisEcom->prenom_destinataire }}</div>
                                 <div class="text-[11px] text-slate-400"><i class="fas fa-map-marker-alt mr-1"></i>{{ $colisEcom->adresse_destinataire }}</div>
@@ -193,10 +193,10 @@
                 <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">DH</span>
                     <!-- Input name matches the validator in RetraitController -->
-                    <input type="number" name="montant" id="montant" min="10" max="{{ $soldeDynamique ?? 0 }}" placeholder="Ex: 500" required
+                    <input type="number" name="montant" id="montant" min="100" max="{{ $soldeDynamique ?? 0 }}" placeholder="Ex: 500" required
                            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 font-semibold text-slate-800">
                 </div>
-                <p class="text-[10px] text-slate-400 mt-1.5">Le montant minimum de retrait est fixé à 10.00 DH.</p>
+                <p class="text-[10px] text-slate-400 mt-1.5">Le montant minimum de retrait est fixé à 100.00 DH.</p>
             </div>
 
             <!-- Modal Action Buttons -->
