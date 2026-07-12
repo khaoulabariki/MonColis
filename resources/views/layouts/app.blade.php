@@ -82,8 +82,11 @@
                     <a href="/ecommercant/dashboard" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition {{ Request::is('ecommercant/dashboard*') ? 'bg-brand-blue text-white' : 'text-slate-600 hover:bg-slate-50' }}">
                         <i class="fas fa-chart-pie w-5"></i> Mon Dashboard
                     </a>
-                    <a href="/ecommercant/colis" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition {{ Request::is('ecommercant/colis*') ? 'bg-brand-blue text-white' : 'text-slate-600 hover:bg-slate-50' }}">
-                        <i class="fas fa-boxes w-5"></i> Mes Colis
+                    <a href="/ecommercant/colis" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition {{ Request::is('ecommercant/colis') ? 'bg-brand-blue text-white' : 'text-slate-600 hover:bg-slate-50' }}">
+                        <i class="fas fa-box w-5"></i> Mes Colis
+                    </a>
+                    <a href="{{ route('ecommercant.colis.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition {{ Request::is('ecommercant/colis/create') ? 'bg-brand-blue text-white' : 'text-slate-600 hover:bg-slate-50' }}">
+                        <i class="fas fa-plus-circle w-5"></i> Nouveau Colis
                     </a>
                     <a href="/ecommercant/destinataires" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition {{ Request::is('ecommercant/destinataires*') ? 'bg-brand-blue text-white' : 'text-slate-600 hover:bg-slate-50' }}">
                         <i class="fas fa-users w-5"></i> Mes Destinataires
