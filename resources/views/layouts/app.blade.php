@@ -15,6 +15,7 @@
         .text-brand-orange { color: #FF6B00; }
         .bg-brand-orange { background-color: #FF6B00; }
     </style>
+    @yield('styles')
 </head>
 <body class="bg-slate-100 font-sans antialiased text-slate-800 h-screen overflow-hidden">
 

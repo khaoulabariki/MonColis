@@ -275,6 +275,35 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
 
         return redirect()->back()->with('success', 'Destinataire enregistré avec succès !');
     })->name('destinataires.store');
+
+    Route::post('/destinataires/{id}/update', function (Illuminate\Http\Request $request, $id) {
+        $destinataire = \App\Models\Destinataire::where('id', $id)->where('utilisateur_id', auth()->id())->firstOrFail();
+        
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'telephone' => 'required|string|max:255',
+            'ville' => 'required|string|max:255',
+            'adresse' => 'required|string',
+        ]);
+
+        $destinataire->update([
+            'nom' => $request->nom,
+            'prenom' => $request->prenom,
+            'telephone' => $request->telephone,
+            'ville' => $request->ville,
+            'adresse' => $request->adresse,
+        ]);
+
+        return redirect()->back()->with('success', 'Destinataire mis à jour avec succès !');
+    })->name('destinataires.update');
+
+    Route::delete('/destinataires/{id}/supprimer', function ($id) {
+        $destinataire = \App\Models\Destinataire::where('id', $id)->where('utilisateur_id', auth()->id())->firstOrFail();
+        $destinataire->delete();
+        
+        return redirect()->back()->with('success', 'Destinataire supprimé avec succès !');
+    })->name('destinataires.destroy');
 });
 
 /*

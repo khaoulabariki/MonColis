@@ -1,5 +1,40 @@
 @extends('layouts.app')
 
+@section('styles')
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+<style>
+    .ts-control {
+        border-radius: 0.75rem !important;
+        border-color: #e2e8f0 !important;
+        background-color: #f8fafc !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.875rem !important;
+        font-weight: 700 !important;
+        color: #334155 !important;
+        box-shadow: none !important;
+    }
+    .ts-control.focus {
+        border-color: #0A4BB3 !important;
+        box-shadow: none !important;
+    }
+    .ts-dropdown {
+        border-radius: 0.75rem;
+        border-color: #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #475569;
+    }
+    .ts-dropdown .option {
+        padding: 0.75rem 1rem;
+    }
+    .ts-dropdown .option.active {
+        background-color: #eff6ff;
+        color: #0A4BB3;
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="w-full max-w-3xl mx-auto">
     
@@ -28,9 +63,9 @@
 
             <div class="mb-6">
                 <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Choisir un destinataire</label>
-                <div class="relative">
-                    <select id="destinataire_select" name="destinataire_id" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:border-brand-blue transition appearance-none cursor-pointer" required>
-                        <option value="" disabled selected>-- Sélectionnez un destinataire enregistré --</option>
+                <div>
+                    <select id="destinataire_select" name="destinataire_id" placeholder="-- Sélectionnez ou recherchez (Nom, Prénom, Tél) --" autocomplete="off" class="w-full" required>
+                        <option value="">-- Sélectionnez ou recherchez (Nom, Prénom, Tél) --</option>
                         @foreach(auth()->user()->destinataires as $dest)
                             <option value="{{ $dest->id }}" 
                                     data-nom="{{ $dest->nom }}" 
@@ -41,9 +76,6 @@
                             </option>
                         @endforeach
                     </select>
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </div>
                 </div>
             </div>
 
@@ -109,21 +141,37 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 <script>
-    document.getElementById('destinataire_select').addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        
-        if (selectedOption && selectedOption.value !== "") {
-            const nom = selectedOption.getAttribute('data-nom');
-            const prenom = selectedOption.getAttribute('data-prenom');
-            const phone = selectedOption.getAttribute('data-phone');
-            const adresse = selectedOption.getAttribute('data-adresse');
+    document.addEventListener("DOMContentLoaded", function() {
+        new TomSelect("#destinataire_select", {
+            create: false,
+            sortField: {
+                field: "text",
+                direction: "asc"
+            }
+        });
+
+        document.getElementById('destinataire_select').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
             
-            document.getElementById('nom_destinataire').value = nom;
-            document.getElementById('prenom_destinataire').value = prenom;
-            document.getElementById('telephone_destinataire').value = phone;
-            document.getElementById('adresse_destinataire').value = adresse;
-        }
+            if (selectedOption && selectedOption.value !== "") {
+                const nom = selectedOption.getAttribute('data-nom');
+                const prenom = selectedOption.getAttribute('data-prenom');
+                const phone = selectedOption.getAttribute('data-phone');
+                const adresse = selectedOption.getAttribute('data-adresse');
+                
+                document.getElementById('nom_destinataire').value = nom;
+                document.getElementById('prenom_destinataire').value = prenom;
+                document.getElementById('telephone_destinataire').value = phone;
+                document.getElementById('adresse_destinataire').value = adresse;
+            } else {
+                document.getElementById('nom_destinataire').value = "";
+                document.getElementById('prenom_destinataire').value = "";
+                document.getElementById('telephone_destinataire').value = "";
+                document.getElementById('adresse_destinataire').value = "";
+            }
+        });
     });
 </script>
 @endsection
