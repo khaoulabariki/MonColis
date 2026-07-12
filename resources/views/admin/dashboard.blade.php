@@ -144,12 +144,15 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
     
-    <div class="bg-white rounded-3xl p-8 border border-slate-200/60 shadow-xs flex flex-col justify-between min-h-[420px]">
-        <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Ventilation Graphique des Colis</h3>
-        <div class="h-64 w-full flex justify-center items-center">
+     <div class="bg-white rounded-3xl p-8 border border-slate-200/60 shadow-xs flex flex-col justify-between min-h-[420px]">
+    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Ventilation Graphique des Colis</h3>
+    
+    <div class="h-64 w-full flex flex-col justify-center items-center my-auto">
+        <div class="relative w-full h-full flex justify-center items-center">
             <canvas id="colisChart"></canvas>
         </div>
     </div>
+</div>
 
     {{-- 🤖 SECTION IA ENRICHIE --}}
     <div class="bg-white rounded-3xl p-8 border border-slate-200/60 shadow-xs flex flex-col justify-between min-h-[420px]">

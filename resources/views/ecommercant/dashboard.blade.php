@@ -71,7 +71,7 @@
                     <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-600 text-white px-2.5 py-1 rounded-lg">
                         <i class="fas fa-heart text-[9px] mr-1"></i> Avis & Sentiments
                     </span>
-                    <span class="text-2xl animate-bounce">✨ 😊 ✨</span>
+                    <span class="text-2xl animate-bounce"> 😊 </span>
                 </div>
                 
                 <h4 class="text-base font-black text-emerald-950 tracking-tight mb-2">Humeur Générale</h4>

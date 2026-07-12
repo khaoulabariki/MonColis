@@ -89,9 +89,7 @@
                                     <th class="p-4">Destinataire</th>
                                     <th class="p-4">Adresse</th>
                                     <th class="p-4">Prix</th>
-                                    <th class="p-4">Statut</th>
-                                    <th class="p-4 pr-6">Actions</th>
-                                </tr>
+                                    <th class="p-4 pr-6">Statut</th> </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 text-xs font-bold">
                                 @forelse($colis as $c)
@@ -100,8 +98,7 @@
                                     <td class="p-4 text-slate-900">{{ $c->prenom_destinataire }} {{ $c->nom_destinataire }}</td>
                                     <td class="p-4 text-slate-500 font-medium max-w-xs truncate">{{ $c->adresse_destinataire }}</td>
                                     <td class="p-4 font-black text-slate-900">{{ number_format($c->prix, 2) }} DH</td>
-                                    <td class="p-4">
-                                        @php
+                                    <td class="p-4 pr-6"> @php
                                             $colors = [
                                                 'enregistre' => 'bg-slate-100 text-slate-700 border-slate-200',
                                                 'ramasse'    => 'bg-blue-50 text-brand-blue border-blue-100',
@@ -124,16 +121,10 @@
                                             {{ $labels[$c->statut] ?? str_replace('_', ' ', $c->statut) }}
                                         </span>
                                     </td>
-                                    <td class="p-4 pr-6">
-                                        <a href="{{ route('tracking.public', $c->token_suivi) }}" target="_blank"
-                                            class="text-brand-blue bg-blue-50 hover:bg-brand-blue hover:text-white px-3 py-1.5 rounded-xl transition text-[11px] font-black tracking-wide uppercase inline-flex items-center gap-1">
-                                            <i class="fas fa-eye text-[10px]"></i> Suivi
-                                        </a>
-                                    </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="p-12 text-center text-slate-400 font-medium">
+                                    <td colspan="5" class="p-12 text-center text-slate-400 font-medium">
                                         <div class="text-slate-300 text-2xl mb-2"><i class="fas fa-box-open"></i></div>
                                         Aucun colis enregistré pour le moment.
                                     </td>

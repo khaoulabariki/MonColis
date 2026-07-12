@@ -77,8 +77,8 @@
     <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden mb-8">
         <div class="p-6 border-b border-slate-100 bg-emerald-50/20 flex items-center justify-between">
             <div>
-                <h3 class="font-bold text-slate-800 text-base"><i class="fas fa-check-double text-emerald-500 mr-2"></i>Détail de mes gains par colis</h3>
-                <p class="text-xs text-slate-400 mt-0.5">Retrouvez la liste de vos colis livrés et le montant net crédité sur votre solde.</p>
+                <h3 class="font-bold text-slate-800 text-base"><i class="fas fa-check-double text-emerald-500 mr-2"></i>Détail de mes gains et frais par colis</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Retrouvez la liste de vos colis livrés ou retournés, et le montant net crédité ou débité sur votre solde.</p>
             </div>
             <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">Automatique</span>
         </div>
@@ -94,22 +94,39 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-medium">
-                    @forelse(\App\Models\Colis::where('ecommercant_id', auth()->id())->where('statut', 'livre')->orderBy('updated_at', 'desc')->get() as $colisEcom)
+                    @forelse(\App\Models\Colis::where('ecommercant_id', auth()->id())->whereIn('statut', ['livre', 'retourne'])->orderBy('updated_at', 'desc')->get() as $colisEcom)
                         <tr class="hover:bg-slate-50/50 transition">
-                            <td class="p-4 font-semibold text-brand-blue">#{{ $colisEcom->code_suivi }}</td>
+                            <td class="p-4 font-semibold text-brand-blue">
+                                #{{ $colisEcom->code_suivi }}
+                                @if($colisEcom->statut === 'retourne')
+                                    <span class="ml-2 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">Retourné</span>
+                                @else
+                                    <span class="ml-2 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Livré</span>
+                                @endif
+                            </td>
                             <td class="p-4 text-slate-700">
                                 <div class="font-semibold">{{ $colisEcom->nom_destinataire }} {{ $colisEcom->prenom_destinataire }}</div>
                                 <div class="text-[11px] text-slate-400"><i class="fas fa-map-marker-alt mr-1"></i>{{ $colisEcom->adresse_destinataire }}</div>
                             </td>
-                            <td class="p-4 text-slate-400 font-bold">{{ number_format($colisEcom->prix, 2) }} DH</td>
+                            <td class="p-4 text-slate-400 font-bold">
+                                @if($colisEcom->statut === 'retourne')
+                                    <span class="line-through text-slate-300">{{ number_format($colisEcom->prix, 2) }} DH</span>
+                                @else
+                                    {{ number_format($colisEcom->prix, 2) }} DH
+                                @endif
+                            </td>
                             <td class="p-4 text-rose-500 font-semibold">- 50.00 DH</td>
-                            <td class="p-4 text-emerald-600 font-extrabold text-right text-base">
-                                + {{ number_format($colisEcom->prix - 50, 2) }} DH
+                            <td class="p-4 text-right text-base">
+                                @if($colisEcom->statut === 'livre')
+                                    <span class="text-emerald-600 font-extrabold">+ {{ number_format($colisEcom->prix - 50, 2) }} DH</span>
+                                @elseif($colisEcom->statut === 'retourne')
+                                    <span class="text-rose-600 font-extrabold">- 50.00 DH</span>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="p-8 text-center text-slate-400 text-xs">Aucun colis livré pour le moment. Votre solde augmentera dès qu'un colis sera validé.</td>
+                            <td colspan="5" class="p-8 text-center text-slate-400 text-xs">Aucun colis livré ou retourné pour le moment. Votre solde augmentera dès qu'un colis sera validé.</td>
                         </tr>
                     @endforelse
                 </tbody>
