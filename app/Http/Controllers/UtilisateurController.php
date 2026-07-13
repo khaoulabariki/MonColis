@@ -44,7 +44,7 @@ class UtilisateurController extends Controller
 
         $this->logAction('CREATION_ADMIN', "L'administrateur a créé un nouveau compte administrateur : {$adminUser->nom} {$adminUser->prenom}.", 'ADMIN');
 
-        return redirect()->route('admin.administrateurs.index')->with('success', 'Administrateur ajouté avec succès !');
+        return redirect()->route('admin.administrateurs.index')->with('success', __('Administrateur ajouté avec succès !'));
     }
 
     public function destroyAdmin($id)
@@ -56,7 +56,7 @@ class UtilisateurController extends Controller
 
         $this->logAction('SUPPRESSION_ADMIN', "L'administrateur a supprimé le compte de l'administrateur : {$nomComplet}.", 'ADMIN');
 
-        return redirect()->route('admin.administrateurs.index')->with('success', 'Administrateur supprimé avec succès !');
+        return redirect()->route('admin.administrateurs.index')->with('success', __('Administrateur supprimé avec succès !'));
     }
 
     /**
@@ -93,7 +93,7 @@ class UtilisateurController extends Controller
 
         $this->logAction('CREATION_LIVREUR', "L'administrateur a créé un nouveau compte livreur : {$livreurUser->nom} {$livreurUser->prenom}.", 'LIVREUR');
 
-        return redirect()->route('admin.livreurs.index')->with('success', 'Livreur ajouté avec succès !');
+        return redirect()->route('admin.livreurs.index')->with('success', __('Livreur ajouté avec succès !'));
     }
 
     public function destroyLivreur($id)
@@ -105,7 +105,7 @@ class UtilisateurController extends Controller
 
         $this->logAction('SUPPRESSION_LIVREUR', "L'administrateur a supprimé le compte du livreur : {$nomComplet}.", 'LIVREUR');
 
-        return redirect()->route('admin.livreurs.index')->with('success', 'Livreur supprimé avec succès !');
+        return redirect()->route('admin.livreurs.index')->with('success', __('Livreur supprimé avec succès !'));
     }
 
     /**
@@ -147,7 +147,7 @@ class UtilisateurController extends Controller
 
         $this->logAction('CREATION_ECOMMERCANT', "L'administrateur a créé un nouveau compte e-commerçant : {$utilisateur->nom} {$utilisateur->prenom} avec un portefeuille virtuel.", 'ECOMMERCANT');
 
-        return redirect()->route('admin.ecommercants.index')->with('success', 'E-commerçant ajouté avec succès !');
+        return redirect()->route('admin.ecommercants.index')->with('success', __('E-commerçant ajouté avec succès !'));
     }
 
     public function destroyEcom($id)
@@ -159,7 +159,7 @@ class UtilisateurController extends Controller
 
         $this->logAction('SUPPRESSION_ECOMMERCANT', "L'administrateur a supprimé le compte de l'e-commerçant : {$nomComplet}.", 'ECOMMERCANT');
 
-        return redirect()->route('admin.ecommercants.index')->with('success', 'E-commerçant supprimé avec succès !');
+        return redirect()->route('admin.ecommercants.index')->with('success', __('E-commerçant supprimé avec succès !'));
     }
 
     /**
@@ -196,7 +196,7 @@ class UtilisateurController extends Controller
 
         Utilisateur::where('id', $user->id)->update($data);
 
-        return redirect()->back()->with('success', 'Votre profil a été mis à jour avec succès !');
+        return redirect()->back()->with('success', __('Votre profil a été mis à jour avec succès !'));
     }
 
     /**

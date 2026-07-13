@@ -6,11 +6,11 @@
     {{-- 📋 En-tête de la page --}}
     <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[10px] font-black text-[#0A4BB3] uppercase tracking-widest block mb-1">Trésorerie & Distribution</span>
+            <span class="text-[10px] font-black text-[#0A4BB3] uppercase tracking-widest block mb-1">{{ __('Trésorerie & Distribution') }}</span>
             <h2 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <i class="fas fa-wallet text-[#0A4BB3]"></i> Gestion de Caisse & Clôtures
+                <i class="fas fa-wallet text-[#0A4BB3]"></i> {{ __('Gestion de Caisse & Clôtures') }}
             </h2>
-            <p class="text-sm text-slate-400 font-medium mt-0.5">Suivi des fonds non récupérés, traitement des retraits et gestion des caisses livreurs.</p>
+            <p class="text-sm text-slate-400 font-medium mt-0.5">{{ __('Suivi des fonds non récupérés, traitement des retraits et gestion des caisses livreurs.') }}</p>
         </div>
     </div>
 
@@ -45,25 +45,25 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between">
             <div>
-                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Cash en Circulation</span>
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">{{ __('Cash en Circulation') }}</span>
                 <h3 class="text-xl font-black text-slate-900 tracking-tight">{{ number_format($cashEnAttenteGlobal, 2) }} DH</h3>
             </div>
         </div>
         <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between border-b-4 border-b-emerald-500">
             <div>
-                <span class="text-[9px] font-black text-emerald-700 uppercase tracking-widest block mb-1">A Récupérer Admin & Marchands</span>
+                <span class="text-[9px] font-black text-emerald-700 uppercase tracking-widest block mb-1">{{ __('A Récupérer Admin & Marchands') }}</span>
                 <h3 class="text-xl font-black text-emerald-600 tracking-tight">{{ number_format($netAdminEnAttente, 2) }} DH</h3>
             </div>
         </div>
         <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between border-b-4 border-b-amber-500">
             <div>
-                <span class="text-[9px] font-black text-amber-700 uppercase tracking-widest block mb-1">Commissions Livreurs</span>
+                <span class="text-[9px] font-black text-amber-700 uppercase tracking-widest block mb-1">{{ __('Commissions Livreurs') }}</span>
                 <h3 class="text-xl font-black text-amber-600 tracking-tight">{{ number_format($gainsLivreursEnAttente, 2) }} DH</h3>
             </div>
         </div>
         <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-xs flex items-center justify-between">
             <div>
-                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Solde Total E-com</span>
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">{{ __('Solde Total E-com') }}</span>
                 <h3 class="text-xl font-black text-slate-900 tracking-tight">{{ number_format($totalSolde ?? 0, 2) }} DH</h3>
             </div>
         </div>
@@ -72,17 +72,17 @@
     {{-- ⚠️ Table 1 : Demandes de Retrait --}}
     <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xl overflow-hidden mb-8">
         <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-            <h3 class="font-black text-slate-900 text-xl tracking-tight"><i class="fas fa-clock text-amber-500 mr-2"></i>Demandes de Retrait en Attente</h3>
+            <h3 class="font-black text-slate-900 text-xl tracking-tight"><i class="fas fa-clock text-amber-500 me-2"></i>{{ __('Demandes de Retrait en Attente') }}</h3>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-sm text-slate-600">
+            <table class="w-full text-start border-collapse text-sm text-slate-600">
                 <thead class="bg-slate-50/40 text-slate-400 font-black uppercase text-[10px] tracking-widest border-b border-slate-100">
                     <tr>
-                        <th class="py-5 px-6">ID</th>
-                        <th class="py-5 px-6">E-commerçant</th>
-                        <th class="py-5 px-6">Solde Marchand</th>
-                        <th class="py-5 px-6">Montant Demandé</th>
-                        <th class="py-5 px-6 text-center">Actions</th>
+                        <th class="py-5 px-6 text-start">ID</th>
+                        <th class="py-5 px-6 text-start">{{ __('E-commerçant') }}</th>
+                        <th class="py-5 px-6 text-start">{{ __('Solde Marchand') }}</th>
+                        <th class="py-5 px-6 text-start">{{ __('Montant Demandé') }}</th>
+                        <th class="py-5 px-6 text-center">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-medium">
@@ -93,7 +93,7 @@
                             <tr class="hover:bg-amber-50/10 transition">
                                 <td class="py-5 px-6 font-mono text-xs text-slate-400">#{{ $retrait->id }}</td>
                                 <td class="py-5 px-6 font-bold text-slate-800">
-                                    {{ $retrait->ecommercant->nom ?? 'Marchand' }} {{ $retrait->ecommercant->prenom ?? '' }}
+                                    {{ $retrait->ecommercant->nom ?? __('Marchand') }} {{ $retrait->ecommercant->prenom ?? '' }}
                                 </td>
                                 <td class="py-5 px-6 font-mono text-slate-500">
                                     {{ number_format($retrait->ecommercant && $retrait->ecommercant->wallet ? $retrait->ecommercant->wallet->solde : 0, 2) }} DH
@@ -104,12 +104,12 @@
                                         <form action="{{ route('admin.finances.valider', $retrait->id) }}" method="POST" class="m-0">
                                             @csrf
                                             <input type="hidden" name="statut" value="valide">
-                                            <button type="submit" class="bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-black uppercase cursor-pointer border-0">Valider</button>
+                                            <button type="submit" class="bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-black uppercase cursor-pointer border-0">{{ __('Valider') }}</button>
                                         </form>
                                         <form action="{{ route('admin.finances.valider', $retrait->id) }}" method="POST" class="m-0">
                                             @csrf
                                             <input type="hidden" name="statut" value="rejete">
-                                            <button type="submit" class="bg-rose-500 text-white px-3 py-1.5 rounded-xl text-xs font-black uppercase cursor-pointer border-0">Rejeter</button>
+                                            <button type="submit" class="bg-rose-500 text-white px-3 py-1.5 rounded-xl text-xs font-black uppercase cursor-pointer border-0">{{ __('Rejeter') }}</button>
                                         </form>
                                     </div>
                                 </td>
@@ -117,7 +117,7 @@
                         @endif
                     @endforeach
                     @if(!$hasEnAttente)
-                        <tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold">Aucune demande en attente.</td></tr>
+                        <tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold">{{ __('Aucune demande en attente.') }}</td></tr>
                     @endif
                 </tbody>
             </table>
@@ -127,14 +127,14 @@
     {{-- 👥 Table 2 : Soldes par E-commerçant --}}
     <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xs overflow-hidden mb-8">
         <div class="p-6 border-b border-slate-100">
-            <h3 class="font-black text-slate-900 text-lg tracking-tight"><i class="fas fa-users text-[#0A4BB3] mr-1.5"></i>Soldes par E-commerçant</h3>
+            <h3 class="font-black text-slate-900 text-lg tracking-tight"><i class="fas fa-users text-[#0A4BB3] me-1.5"></i>{{ __('Soldes par E-commerçant') }}</h3>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs text-slate-600">
+            <table class="w-full text-start border-collapse text-xs text-slate-600">
                 <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[9px] tracking-widest border-b border-slate-100">
                     <tr>
-                        <th class="py-4 px-5">E-commerçant</th>
-                        <th class="py-4 px-5 text-right">Solde Actuel</th>
+                        <th class="py-4 px-5 text-start">{{ __('E-commerçant') }}</th>
+                        <th class="py-4 px-5 text-end">{{ __('Solde Actuel') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-medium">
@@ -145,16 +145,16 @@
                                 <div class="w-6 h-6 rounded-md bg-blue-50 text-[#0A4BB3] flex items-center justify-center">
                                     <i class="fas fa-store"></i>
                                 </div>
-                                {{ $wallet->ecommercant->nom ?? 'Marchand' }} {{ $wallet->ecommercant->prenom ?? '' }}
+                                {{ $wallet->ecommercant->nom ?? __('Marchand') }} {{ $wallet->ecommercant->prenom ?? '' }}
                             </td>
-                            <td class="py-4 px-5 font-black text-slate-900 text-right">
+                            <td class="py-4 px-5 font-black text-slate-900 text-end">
                                 <span class="bg-slate-100 px-2.5 py-1 rounded-lg font-mono text-emerald-600">
                                     {{ number_format($wallet->solde ?? 0, 2) }} DH
                                 </span>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="2" class="p-6 text-center text-slate-400">Aucun portefeuille trouvé.</td></tr>
+                        <tr><td colspan="2" class="p-6 text-center text-slate-400">{{ __('Aucun portefeuille trouvé.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -164,18 +164,18 @@
     {{-- 👥 Table 3 : Situation des caisses par Livreur --}}
     <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xs overflow-hidden">
         <div class="p-6 border-b border-slate-100">
-            <h3 class="font-black text-slate-900 text-lg tracking-tight"><i class="fas fa-truck text-rose-500 mr-1.5"></i>Situation des caisses par Livreur</h3>
+            <h3 class="font-black text-slate-900 text-lg tracking-tight"><i class="fas fa-truck text-rose-500 me-1.5 rtl:-scale-x-100"></i>{{ __('Situation des caisses par Livreur') }}</h3>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs text-slate-600">
+            <table class="w-full text-start border-collapse text-xs text-slate-600">
                 <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[9px] tracking-widest border-b border-slate-100">
                     <tr>
-                        <th class="py-4 px-5">Livreur</th>
-                        <th class="py-4 px-5 text-center">Colis Non Récupérés</th>
-                        <th class="py-4 px-5 text-center text-amber-700">Gain Livreur (20DH)</th>
-                        <th class="py-4 px-5 text-center text-rose-700">Total Encaissé</th>
-                        <th class="py-4 px-5 text-center text-emerald-700">Dû à l'Admin</th>
-                        <th class="py-4 px-5 text-right">Action</th>
+                        <th class="py-4 px-5 text-start">{{ __('Livreur') }}</th>
+                        <th class="py-4 px-5 text-center">{{ __('Colis Non Récupérés') }}</th>
+                        <th class="py-4 px-5 text-center text-amber-700">{{ __('Gain Livreur (20DH)') }}</th>
+                        <th class="py-4 px-5 text-center text-rose-700">{{ __('Total Encaissé') }}</th>
+                        <th class="py-4 px-5 text-center text-emerald-700">{{ __("Dû à l'Admin") }}</th>
+                        <th class="py-4 px-5 text-end">{{ __('Action') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-medium">
@@ -204,19 +204,19 @@
                             <td class="py-4 px-5 text-center text-amber-600 font-mono">{{ number_format($rba7LivreurActuel, 2) }} DH</td>
                             <td class="py-4 px-5 text-center text-rose-600 font-mono">{{ number_format($cashEnPoche, 2) }} DH</td>
                             <td class="py-4 px-5 text-center text-emerald-600 font-mono">{{ number_format($resteAVerserAdmin, 2) }} DH</td>
-                            <td class="py-4 px-5 text-right">
+                            <td class="py-4 px-5 text-end">
                                 @if($colisLivreCount > 0)
                                     <form action="{{ route('admin.finances.cloturer', $livreur->id) }}" method="POST" class="m-0">
                                         @csrf
-                                        <button type="submit" class="bg-slate-900 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-md cursor-pointer border-0">Clôturer</button>
+                                        <button type="submit" class="bg-slate-900 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-md cursor-pointer border-0">{{ __('Clôturer') }}</button>
                                     </form>
                                 @else
-                                    <span class="text-[10px] text-emerald-500 font-bold uppercase mr-2"><i class="fas fa-check-circle"></i> À jour</span>
+                                    <span class="text-[10px] text-emerald-500 font-bold uppercase me-2"><i class="fas fa-check-circle"></i> {{ __('À jour') }}</span>
                                 @endif
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="p-6 text-center text-slate-400">Aucun livreur trouvé.</td></tr>
+                        <tr><td colspan="6" class="p-6 text-center text-slate-400">{{ __('Aucun livreur trouvé.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

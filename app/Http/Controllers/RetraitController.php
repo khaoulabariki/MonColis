@@ -32,7 +32,7 @@ class RetraitController extends Controller
         $soldeDisponible = $wallet->solde - $retraitsEnAttente;
 
         if ($soldeDisponible < $request->montant) {
-            return response()->json(['message' => 'Solde insuffisant pour effectuer ce retrait'], 400);
+            return response()->json(['message' => __('Solde insuffisant pour effectuer ce retrait')], 400);
         }
 
         // Création de la demande avec le statut 'en_attente'
@@ -42,7 +42,7 @@ class RetraitController extends Controller
             'statut' => 'en_attente'
         ]);
 
-        return response()->json(['message' => 'Demande de retrait enregistrée avec succès', 'retrait' => $retrait], 201);
+        return response()->json(['message' => __('Demande de retrait enregistrée avec succès'), 'retrait' => $retrait], 201);
     }
 /**
      * Traiter la demande de retrait (Par l'Admin : Valider ou Rejeter).
@@ -60,9 +60,9 @@ class RetraitController extends Controller
         if ($retrait->statut !== 'en_attente') {
             // Si la requête vient du formulaire HTML, on redirige avec un message d'erreur
             if (!$request->expectsJson()) {
-                return redirect()->route('admin.finances.index')->with('error', 'Cette demande a déjà été traitée.');
+                return redirect()->route('admin.finances.index')->with('error', __('Cette demande a déjà été traitée.'));
             }
-            return response()->json(['message' => 'Cette demande a déjà été traitée'], 400);
+            return response()->json(['message' => __('Cette demande a déjà été traitée')], 400);
         }
 
         // Si l'admin valide le retrait, on vérifie si le solde est suffisant
@@ -75,9 +75,9 @@ class RetraitController extends Controller
             // Vérifier une dernière fois si le solde est suffisant avant de déduire
             if ($wallet->solde < $retrait->montant) {
                 if (!$request->expectsJson()) {
-                    return redirect()->route('admin.finances.index')->with('error', 'Solde insuffisant pour ce marchand.');
+                    return redirect()->route('admin.finances.index')->with('error', __('Solde insuffisant pour ce marchand.'));
                 }
-                return response()->json(['message' => 'Solde insuffisant'], 400);
+                return response()->json(['message' => __('Solde insuffisant')], 400);
             }
         }
 
@@ -86,9 +86,9 @@ class RetraitController extends Controller
 
         // Redirection propre vers la page des finances avec un message de succès
         if (!$request->expectsJson()) {
-            return redirect()->route('admin.finances.index')->with('success', 'La demande de retrait a été mise à jour avec succès !');
+            return redirect()->route('admin.finances.index')->with('success', __('La demande de retrait a été mise à jour avec succès !'));
         }
 
-        return response()->json(['message' => 'Demande de retrait mise à jour : ' . $request->statut, 'retrait' => $retrait]);
+        return response()->json(['message' => __('Demande de retrait mise à jour :') . ' ' . $request->statut, 'retrait' => $retrait]);
     }
 }

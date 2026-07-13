@@ -4,23 +4,23 @@
 <div class="w-full max-w-7xl mx-auto">
     
     <div class="mb-8">
-        <h1 class="text-2xl font-black text-slate-900 tracking-tight">Tableau de bord</h1>
-        <p class="text-xs font-medium text-slate-400 mt-1">Aperçu en temps réel de votre activity de livraison.</p>
+        <h1 class="text-2xl font-black text-slate-900 tracking-tight">{{ __('Tableau de bord') }}</h1>
+        <p class="text-xs font-medium text-slate-400 mt-1">{{ __('Aperçu en temps réel de votre activité de livraison.') }}</p>
     </div>
     
     <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-xs mb-8">
-        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-5">Suivi du portefeuille & colis</p>
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-5">{{ __('Suivi du portefeuille & colis') }}</p>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             
             <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/50 flex flex-col justify-between min-h-[140px] hover:shadow-md transition duration-200">
                 <div>
-                    <span class="text-[10px] font-black text-brand-orange uppercase tracking-wider bg-orange-50 px-2 py-0.5 rounded-md border border-orange-100/50 inline-block mb-1">Colis Assignés</span>
+                    <span class="text-[10px] font-black text-brand-orange uppercase tracking-wider bg-orange-50 px-2 py-0.5 rounded-md border border-orange-100/50 inline-block mb-1">{{ __('Colis Assignés') }}</span>
                     <p class="text-3xl font-black text-slate-900 mt-2">
                         {{ $colisCount ?? 0 }}
                     </p>
                 </div>
-                <span class="text-xs text-slate-400 font-medium mt-3 block"><i class="fas fa-box mr-1"></i> Prêt(s) à être livrés</span>
+                <span class="text-xs text-slate-400 font-medium mt-3 block"><i class="fas fa-box me-1"></i> {{ __('Prêt(s) à être livrés') }}</span>
             </div>
 
             @php
@@ -40,32 +40,32 @@
 
             <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/50 flex flex-col justify-between min-h-[140px] hover:shadow-md transition duration-200">
                 <div>
-                    <span class="text-[10px] font-black text-slate-600 uppercase tracking-wider bg-slate-200/60 px-2 py-0.5 rounded-md inline-block mb-1">Cash Total En Main</span>
+                    <span class="text-[10px] font-black text-slate-600 uppercase tracking-wider bg-slate-200/60 px-2 py-0.5 rounded-md inline-block mb-1">{{ __('Cash Total En Main') }}</span>
                     <p class="text-3xl font-black text-slate-900 mt-2">
                         {{ number_format($totalCashEnMain, 2) }} <span class="text-sm font-bold text-slate-400">DH</span>
                     </p>
                 </div>
-                <span class="text-[11px] text-slate-500 font-bold mt-3 block"><i class="fas fa-wallet mr-1"></i> Total collecté sur le terrain</span>
+                <span class="text-[11px] text-slate-500 font-bold mt-3 block"><i class="fas fa-wallet me-1"></i> {{ __('Total collecté sur le terrain') }}</span>
             </div>
 
             <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/50 flex flex-col justify-between min-h-[140px] hover:shadow-md transition duration-200">
                 <div>
-                    <span class="text-[10px] font-black text-brand-blue uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 inline-block mb-1">Mes Commissions</span>
+                    <span class="text-[10px] font-black text-brand-blue uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 inline-block mb-1">{{ __('Mes Commissions') }}</span>
                     <p class="text-3xl font-black text-brand-blue mt-2">
                         {{ number_format($totalCommissions, 2) }} <span class="text-sm font-bold text-blue-300">DH</span>
                     </p>
                 </div>
-                <span class="text-[11px] text-brand-blue font-bold mt-3 block"><i class="fas fa-coins mr-1"></i> Votre gain net (20 DH / colis)</span>
+                <span class="text-[11px] text-brand-blue font-bold mt-3 block"><i class="fas fa-coins me-1"></i> {{ __('Votre gain net (20 DH / colis)') }}</span>
             </div>
 
-            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/50 flex flex-col justify-between min-h-[140px] hover:shadow-md border-l-4 border-l-rose-500 transition duration-200">
+            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/50 flex flex-col justify-between min-h-[140px] hover:shadow-md border-s-4 border-s-rose-500 transition duration-200">
                 <div>
-                    <span class="text-[10px] font-black text-rose-600 uppercase tracking-wider bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100/50 inline-block mb-1">À Verser à l'Admin</span>
+                    <span class="text-[10px] font-black text-rose-600 uppercase tracking-wider bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100/50 inline-block mb-1">{{ __("À Verser à l'Admin") }}</span>
                     <p class="text-3xl font-black text-rose-600 mt-2">
                         {{ number_format($resteADonnerAdmin, 2) }} <span class="text-sm font-bold text-rose-300">DH</span>
                     </p>
                 </div>
-                <span class="text-[11px] text-rose-500 font-bold mt-3 block"><i class="fas fa-arrow-circle-right mr-1"></i> Montant dû à l'administration</span>
+                <span class="text-[11px] text-rose-500 font-bold mt-3 block"><i class="fas fa-arrow-circle-right me-1 rtl:rotate-180"></i> {{ __("Montant dû à l'administration") }}</span>
             </div>
 
         </div>
@@ -73,33 +73,33 @@
 
     <div class="bg-white rounded-3xl shadow-xs border border-slate-200/60 overflow-hidden w-full">
         <div class="p-6 border-b border-slate-100 flex items-center justify-between">
-            <h3 class="font-black text-slate-900 text-base flex items-center gap-2"><i class="fas fa-history text-slate-400"></i> Historique des colis livrés</h3>
-            <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-100 font-black uppercase tracking-wider px-3 py-1 rounded-xl shadow-xs">Encaissé</span>
+            <h3 class="font-black text-slate-900 text-base flex items-center gap-2"><i class="fas fa-history text-slate-400"></i> {{ __('Historique des colis livrés') }}</h3>
+            <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-100 font-black uppercase tracking-wider px-3 py-1 rounded-xl shadow-xs">{{ __('Encaissé') }}</span>
         </div>
         
         <div class="overflow-x-auto w-full">
-            <table class="w-full text-left border-collapse text-sm text-slate-600">
+            <table class="w-full text-start border-collapse text-sm text-slate-600">
                 <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[10px] tracking-widest border-b border-slate-100">
                     <tr>
-                        <th class="p-4 pl-6">Code Colis</th>
-                        <th class="p-4">Destinataire</th>
-                        <th class="p-4">Date de Livraison</th>
-                        <th class="p-4">Montant Collecté</th>
-                        <th class="p-4 pr-6">Ma Commission</th>
+                        <th class="p-4 ps-6 text-start">{{ __('Code Colis') }}</th>
+                        <th class="p-4 text-start">{{ __('Destinataire') }}</th>
+                        <th class="p-4 text-start">{{ __('Date de Livraison') }}</th>
+                        <th class="p-4 text-start">{{ __('Montant Collecté') }}</th>
+                        <th class="p-4 pe-6 text-start">{{ __('Ma Commission') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-xs font-bold">
                     @forelse(\App\Models\Colis::where('livreur_id', auth()->id())->whereIn('statut', ['livre', 'Livré', 'cloture'])->orderBy('updated_at', 'desc')->get() as $colisLivre)
                         <tr class="hover:bg-slate-50/40 transition">
-                            <td class="p-4 pl-6 font-black text-brand-blue">{{ $colisLivre->code_suivi }}</td>
+                            <td class="p-4 ps-6 font-black text-brand-blue">{{ $colisLivre->code_suivi }}</td>
                             <td class="p-4 text-slate-700">{{ $colisLivre->nom_destinataire }} {{ $colisLivre->prenom_destinataire }}</td>
                             <td class="p-4 font-medium text-slate-400">{{ $colisLivre->updated_at->format('d/m/Y H:i') }}</td>
                             <td class="p-4 font-black text-slate-900">{{ number_format($colisLivre->prix, 2) }} DH</td>
-                            <td class="p-4 pr-6 text-emerald-600 font-black">+ 20.00 DH</td>
+                            <td class="p-4 pe-6 text-emerald-600 font-black">+ 20.00 DH</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="p-8 text-center text-slate-400 text-xs font-medium">Aucun colis marqué comme "Livré" pour le moment.</td>
+                            <td colspan="5" class="p-8 text-center text-slate-400 text-xs font-medium">{{ __('Aucun colis marqué comme "Livré" pour le moment.') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

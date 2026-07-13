@@ -39,8 +39,8 @@
 <div class="w-full max-w-3xl mx-auto">
     
     <div class="mb-8">
-        <h1 class="text-2xl font-black text-slate-900 tracking-tight">Enregistrer un Colis</h1>
-        <p class="text-xs font-medium text-slate-400 mt-1">Créez une nouvelle expédition en sélectionnant un destinataire pré-enregistré.</p>
+        <h1 class="text-2xl font-black text-slate-900 tracking-tight">{{ __('Enregistrer un Colis') }}</h1>
+        <p class="text-xs font-medium text-slate-400 mt-1">{{ __('Créez une nouvelle expédition en sélectionnant un destinataire pré-enregistré.') }}</p>
     </div>
 
     @if(session('success'))
@@ -62,10 +62,10 @@
             @csrf
 
             <div class="mb-6">
-                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Choisir un destinataire</label>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">{{ __('Choisir un destinataire') }}</label>
                 <div>
-                    <select id="destinataire_select" name="destinataire_id" placeholder="-- Sélectionnez ou recherchez (Nom, Prénom, Tél) --" autocomplete="off" class="w-full" required>
-                        <option value="">-- Sélectionnez ou recherchez (Nom, Prénom, Tél) --</option>
+                    <select id="destinataire_select" name="destinataire_id" placeholder="{{ __('-- Sélectionnez ou recherchez (Nom, Prénom, Tél) --') }}" autocomplete="off" class="w-full" required>
+                        <option value="">{{ __('-- Sélectionnez ou recherchez (Nom, Prénom, Tél) --') }}</option>
                         @foreach(auth()->user()->destinataires as $dest)
                             <option value="{{ $dest->id }}" 
                                     data-nom="{{ $dest->nom }}" 
@@ -83,13 +83,13 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Nom destinataire</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">{{ __('Nom destinataire') }}</label>
                     <input type="text" id="nom_destinataire" name="nom_destinataire" value="{{ old('nom_destinataire') }}"
                         class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:border-brand-blue transition"
                         readonly required>
                 </div>
                 <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Prénom destinataire</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">{{ __('Prénom destinataire') }}</label>
                     <input type="text" id="prenom_destinataire" name="prenom_destinataire" value="{{ old('prenom_destinataire') }}"
                         class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:border-brand-blue transition"
                         readonly required>
@@ -97,14 +97,14 @@
             </div>
 
             <div class="mb-4">
-                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Téléphone destinataire</label>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">{{ __('Téléphone destinataire') }}</label>
                 <input type="text" id="telephone_destinataire" name="telephone_destinataire" value="{{ old('telephone_destinataire') }}"
                     class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:border-brand-blue transition"
                     readonly required>
             </div>
 
             <div class="mb-6">
-                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Adresse de livraison</label>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">{{ __('Adresse de livraison') }}</label>
                 <textarea id="adresse_destinataire" name="adresse_destinataire" rows="2"
                     class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:border-brand-blue transition"
                     readonly required>{{ old('adresse_destinataire') }}</textarea>
@@ -114,7 +114,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Poids (kg)</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">{{ __('Poids (kg)') }}</label>
                     <div class="relative">
                         <input type="number" name="poids" step="0.1" value="{{ old('poids') }}"
                             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-blue transition"
@@ -122,7 +122,7 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Prix de vente (DH)</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">{{ __('Prix de vente (DH)') }}</label>
                     <div class="relative">
                         <input type="number" name="prix" step="0.01" value="{{ old('prix') }}"
                             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-blue transition"
@@ -133,7 +133,7 @@
 
             <button type="submit"
                 class="w-full bg-brand-blue hover:bg-brand-blue-dark text-white font-black py-3.5 rounded-xl transition duration-200 cursor-pointer shadow-xs text-sm uppercase tracking-wider">
-                <i class="fas fa-paper-plane mr-2"></i> Enregistrer le Colis
+                <i class="fas fa-paper-plane me-2 rtl:-scale-x-100"></i> {{ __('Enregistrer le Colis') }}
             </button>
         </form>
     </div>

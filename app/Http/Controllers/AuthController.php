@@ -45,7 +45,7 @@ class AuthController extends Controller
         // Vérification des identifiants (Email existant et mot de passe correspondant)
         if (!$utilisateur || !Hash::check($request->password, $utilisateur->password)) {
             if ($request->wantsJson()) {
-                return response()->json(['message' => 'Identifiants incorrects'], 401);
+                return response()->json(['message' => __('Identifiants incorrects')], 401);
             }
             // Pour l'audit log, on enregistre la tentative de connexion échouée
 $nomUtilisateur = $utilisateur ? ($utilisateur->nom . ' ' . $utilisateur->prenom) : $request->email;
@@ -55,15 +55,15 @@ $this->logAction(
     "Tentative de connexion échouée avec l'email : " . $nomUtilisateur,
     'SYSTEME'
 );
-            return redirect()->back()->withErrors(['email' => 'Identifiants incorrects'])->withInput();
+            return redirect()->back()->withErrors(['email' => __('Identifiants incorrects')])->withInput();
         }
 
         // Vérifier si le compte est actif (statut = true)
         if (!$utilisateur->statut) {
             if ($request->wantsJson()) {
-                return response()->json(['message' => 'Votre compte est inactif'], 403);
+                return response()->json(['message' => __('Votre compte est inactif')], 403);
             }
-            return redirect()->back()->withErrors(['email' => 'Votre compte est actuellement inactif.'])->withInput();
+            return redirect()->back()->withErrors(['email' => __('Votre compte est actuellement inactif.')])->withInput();
         }
 
         // 🎯 CORRECTION SÉCURITÉ & SESSION : 
@@ -77,7 +77,7 @@ $this->logAction(
         // Si la requête attend du JSON (Appels API / Applications mobiles)
         if ($request->wantsJson()) {
             return response()->json([
-                'message' => 'Connexion réussie',
+                'message' => __('Connexion réussie'),
                 'utilisateur' => $utilisateur,
                 'role' => $utilisateur->role
             ]);
@@ -134,7 +134,7 @@ $this->logAction(
 
         // Si la requête provient d'une API mobile (attend du JSON)
         if ($request->wantsJson()) {
-            return response()->json(['message' => 'Compte créé avec succès', 'utilisateur' => $utilisateur], 201);
+            return response()->json(['message' => __('Compte créé avec succès'), 'utilisateur' => $utilisateur], 201);
         }
 
         // 🎯 POUR LE WEB : Connecter automatiquement le nouvel utilisateur après inscription
@@ -144,9 +144,9 @@ $this->logAction(
 
         // Redirection instantanée vers le bon Dashboard selon le rôle choisi
         if ($utilisateur->role === 'ecommercant') {
-            return redirect()->route('ecommercant.dashboard')->with('success', 'Votre compte Pro E-commerçant a été créé avec succès !');
+            return redirect()->route('ecommercant.dashboard')->with('success', __('Votre compte Pro E-commerçant a été créé avec succès !'));
         } elseif ($utilisateur->role === 'livreur') {
-            return redirect()->route('livreur.dashboard')->with('success', 'Votre compte de Livreur a été créé avec succès !');
+            return redirect()->route('livreur.dashboard')->with('success', __('Votre compte de Livreur a été créé avec succès !'));
         }
 
         return redirect('/tracking');
@@ -164,6 +164,6 @@ $this->logAction(
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login')->with('success', 'Déconnexion réussie.');
+        return redirect('/login')->with('success', __('Déconnexion réussie.'));
     }
 }

@@ -29,6 +29,13 @@ Route::get('/', function () {
     return redirect('/tracking');
 });
 
+Route::get('/lang/{locale}', function (string $locale) {
+    if (in_array($locale, \App\Http\Middleware\SetLocale::LOCALES, true)) {
+        session(['locale' => $locale]);
+    }
+    return redirect()->back();
+})->name('lang.switch');
+
 Route::get('/tracking', function (Request $request) {
     $code = $request->query('code');
     $colis = null;
@@ -45,7 +52,7 @@ Route::get('/contact', function () {
 })->name('contact');
 
 Route::post('/contact', function (Illuminate\Http\Request $request) {
-    return redirect()->back()->with('success', 'Votre message a été envoyé avec succès à l\'administration !');
+    return redirect()->back()->with('success', __('Votre message a été envoyé avec succès à l\'administration !'));
 })->name('contact.post');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -92,20 +99,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         $tauxSatisfaction = $totalAvis > 0 ? round(($positifs / $totalAvis) * 100) : 0;
         
         if ($totalAvis == 0) {
-            $iaResume = "Aucune donnée disponible pour le moment (0 avis).";
-            $iaStatus = "Aucun Avis";
+            $iaResume = __("Aucune donnée disponible pour le moment (0 avis).");
+            $iaStatus = __("Aucun Avis");
             $iaColor = "bg-gray-500/10 text-gray-400 border-gray-500/20";
         } elseif ($tauxSatisfaction >= 75) {
-            $iaResume = "La majorité des destinataires sont très satisfaits de la rapidité de livraison et du comportement des livreurs.";
-            $iaStatus = "Excellent";
+            $iaResume = __("La majorité des destinataires sont très satisfaits de la rapidité de livraison et du comportement des livreurs.");
+            $iaStatus = __("Excellent");
             $iaColor = "bg-green-500/10 text-green-400 border-green-500/20";
         } elseif ($tauxSatisfaction >= 50) {
-            $iaResume = "Attention, retour d'expérience mitigé. Les clients se plaignent de retards légers.";
-            $iaStatus = "Moyen";
+            $iaResume = __("Attention, retour d'expérience mitigé. Les clients se plaignent de retards légers.");
+            $iaStatus = __("Moyen");
             $iaColor = "bg-amber-500/10 text-amber-400 border-amber-500/20";
         } else {
-            $iaResume = "Alerte critique: Plusieurs feedbacks négatifs signalent des colis endommagés.";
-            $iaStatus = "Critique";
+            $iaResume = __("Alerte critique: Plusieurs feedbacks négatifs signalent des colis endommagés.");
+            $iaStatus = __("Critique");
             $iaColor = "bg-red-500/10 text-red-400 border-red-500/20";
         }
 
@@ -190,7 +197,7 @@ Route::post('/admin/colis/store', function (Illuminate\Http\Request $request) {
             'prix'                   => $request->prix,
             'ecommercant_id'         => $request->ecommercant_id,
         ]);
-        $message = 'Colis mis à jour avec succès !';
+        $message = __('Colis mis à jour avec succès !');
     } else {
         \App\Models\Colis::create([
             'code_suivi'             => $request->code_barre,
@@ -204,7 +211,7 @@ Route::post('/admin/colis/store', function (Illuminate\Http\Request $request) {
             'ecommercant_id'         => $request->ecommercant_id,
             'token_suivi'            => (string) \Illuminate\Support\Str::uuid(), 
         ]);
-        $message = 'Colis enregistré avec succès !';
+        $message = __('Colis enregistré avec succès !');
     }
 
     return redirect()->route('admin.colis.index')->with('success', $message);
@@ -212,7 +219,7 @@ Route::post('/admin/colis/store', function (Illuminate\Http\Request $request) {
 
 Route::delete('/admin/colis/{id}/supprimer', function ($id) {
     Colis::where('id', $id)->delete();
-    return redirect()->route('admin.colis.index')->with('success', 'Colis supprimé avec succès !');
+    return redirect()->route('admin.colis.index')->with('success', __('Colis supprimé avec succès !'));
 })->name('admin.colis.destroy');
 
 Route::post('/admin/finances/cloturer/{livreur_id}', [TransactionController::class, 'cloturerLivreur'])->name('admin.finances.cloturer');
@@ -273,7 +280,7 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
             'adresse' => $request->adresse,
         ]);
 
-        return redirect()->back()->with('success', 'Destinataire enregistré avec succès !');
+        return redirect()->back()->with('success', __('Destinataire enregistré avec succès !'));
     })->name('destinataires.store');
 
     Route::post('/destinataires/{id}/update', function (Illuminate\Http\Request $request, $id) {
@@ -295,14 +302,14 @@ Route::middleware(['auth', 'role:ecommercant'])->prefix('ecommercant')->name('ec
             'adresse' => $request->adresse,
         ]);
 
-        return redirect()->back()->with('success', 'Destinataire mis à jour avec succès !');
+        return redirect()->back()->with('success', __('Destinataire mis à jour avec succès !'));
     })->name('destinataires.update');
 
     Route::delete('/destinataires/{id}/supprimer', function ($id) {
         $destinataire = \App\Models\Destinataire::where('id', $id)->where('utilisateur_id', auth()->id())->firstOrFail();
         $destinataire->delete();
         
-        return redirect()->back()->with('success', 'Destinataire supprimé avec succès !');
+        return redirect()->back()->with('success', __('Destinataire supprimé avec succès !'));
     })->name('destinataires.destroy');
 });
 
