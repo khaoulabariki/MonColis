@@ -54,7 +54,7 @@ class ColisController extends Controller
             'token_suivi'            => $tokenSuivi, 
         ]);
 
-        return redirect()->route('ecommercant.colis.index')->with('success', 'Colis enregistré avec succès !');
+        return redirect()->route('ecommercant.colis.index')->with('success', __('Colis enregistré avec succès !'));
     }
 
     // Assigner un livreur au colis (بقا كيما هو للاحتياط)
@@ -76,7 +76,7 @@ class ColisController extends Controller
             'statut' => 'en_cours'
         ]);
 
-        return redirect()->back()->with('success', 'Livreur assigné avec succès !');
+        return redirect()->back()->with('success', __('Livreur assigné avec succès !'));
     }
 
   /**
@@ -169,6 +169,6 @@ class ColisController extends Controller
         }
 
         // 4. الرجوع مع ميساج نجاح
-        return redirect()->back()->with('success', 'Le statut a été mis à jour avec succès !');
+        return redirect()->back()->with('success', __('Le statut a été mis à jour avec succès !'));
     }
 }

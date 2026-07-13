@@ -25,12 +25,12 @@ class AvisController extends Controller
 
         // Si le colis n'existe pas dans la base de données
         if (!$colis) {
-            return redirect()->back()->with('error', 'Impossible d\'associer cet avis à un colis valide.');
+            return redirect()->back()->with('error', __('Impossible d\'associer cet avis à un colis valide.'));
         }
 
         // 3. Vérification sécuritaire : le colis doit être livré pour pouvoir laisser un avis
         if (strtolower($colis->statut) !== 'livre' && strtolower($colis->statut) !== 'livré') {
-            return redirect()->back()->with('error', 'Impossible de laisser un avis sur un colis non livré.');
+            return redirect()->back()->with('error', __('Impossible de laisser un avis sur un colis non livré.'));
         }
 
         // 4. Algorithme intelligent d'analyse de sentiment basé sur des mots-clés (Simulation IA)
@@ -65,6 +65,6 @@ class AvisController extends Controller
          'created_at'     => now()
       ]);
         // 6. Redirection avec un message flash de succès pour le design de l'interface
-        return redirect()->back()->with('success', 'Votre avis a été enregistré et analysé avec succès par notre IA !');
+        return redirect()->back()->with('success', __('Votre avis a été enregistré et analysé avec succès par notre IA !'));
     }
 }

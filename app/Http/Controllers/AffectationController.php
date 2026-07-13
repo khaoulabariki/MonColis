@@ -56,6 +56,6 @@ class AffectationController extends Controller
             'statut' => 'en_cours'
         ]);
 
-        return redirect()->back()->with('success', 'Le colis a été affecté au livreur avec succès !');
+        return redirect()->back()->with('success', __('Le colis a été affecté au livreur avec succès !'));
     }
 }

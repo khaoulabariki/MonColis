@@ -41,6 +41,6 @@ class TransactionController extends Controller
             ->where('encaissement_admin', false)
             ->update(['encaissement_admin' => true]);
 
-        return redirect()->back()->with('success', "La clôture financière pour le livreur {$livreur->nom} {$livreur->prenom} a été effectuée !");
+        return redirect()->back()->with('success', __('La clôture financière pour le livreur :nom :prenom a été effectuée !', ['nom' => $livreur->nom, 'prenom' => $livreur->prenom]));
     }
 }

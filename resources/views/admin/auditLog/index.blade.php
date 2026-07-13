@@ -5,24 +5,24 @@
     
     {{-- 📋 En-tête de la page (Shipily Style) --}}
     <div class="mb-8">
-        <span class="text-[10px] font-black text-[#0A4BB3] uppercase tracking-widest block mb-1">Sécurité & Traçabilité</span>
+        <span class="text-[10px] font-black text-[#0A4BB3] uppercase tracking-widest block mb-1">{{ __('Sécurité & Traçabilité') }}</span>
         <h2 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <i class="fas fa-history text-[#0A4BB3]"></i> Audit Log
+            <i class="fas fa-history text-[#0A4BB3]"></i> {{ __('Audit Log') }}
         </h2>
-        <p class="text-sm text-slate-400 font-medium mt-0.5">Journal d'activités : Historique complet des actions effectuées par les utilisateurs sur la plateforme.</p>
+        <p class="text-sm text-slate-400 font-medium mt-0.5">{{ __("Journal d'activités : Historique complet des actions effectuées par les utilisateurs sur la plateforme.") }}</p>
     </div>
 
     {{-- 🗂️ Tableau des Logs --}}
     <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-100/40 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-sm text-slate-600">
+            <table class="w-full text-start border-collapse text-sm text-slate-600">
                 <thead class="bg-slate-50/70 text-slate-400 font-black uppercase text-[10px] tracking-widest border-b border-slate-100">
                     <tr>
-                        <th class="py-5 px-6">Date & Heure</th>
-                        <th class="py-5 px-6">Utilisateur</th>
-                        <th class="py-5 px-6">Action</th>
-                        <th class="py-5 px-6">Détails / Cible</th>
-                        <th class="py-5 px-6 text-center">Type</th>
+                        <th class="py-5 px-6 text-start">{{ __('Date & Heure') }}</th>
+                        <th class="py-5 px-6 text-start">{{ __('Utilisateur') }}</th>
+                        <th class="py-5 px-6 text-start">{{ __('Action') }}</th>
+                        <th class="py-5 px-6 text-start">{{ __('Détails / Cible') }}</th>
+                        <th class="py-5 px-6 text-center">{{ __('Type') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-medium text-xs">
@@ -51,7 +51,7 @@
                                         <div class="w-6 h-6 rounded-md bg-slate-100 text-slate-500 flex items-center justify-center text-[10px]">
                                             <i class="fas fa-robot"></i>
                                         </div>
-                                        <span class="text-slate-400 italic">Système</span>
+                                        <span class="text-slate-400 italic">{{ __('Système') }}</span>
                                     @endif
                                 </div>
                             </td>        
@@ -65,7 +65,7 @@
                             
                             {{-- Description --}}
                             <td class="py-5 px-6 text-slate-500 max-w-xs truncate font-medium">
-                                {{ $log->description ?? 'Aucun détail supplémentaire' }}
+                                {{ $log->description ?? __('Aucun détail supplémentaire') }}
                             </td>
                             
                             {{-- Badge de Type (Entité) --}}
@@ -88,7 +88,7 @@
                         <tr>
                             <td colspan="5" class="p-10 text-center text-slate-400 font-bold">
                                 <i class="fas fa-shield-alt text-slate-300 text-3xl block mb-2"></i>
-                                Aucun log ou activité enregistré pour le moment.
+                                {{ __('Aucun log ou activité enregistré pour le moment.') }}
                             </td>
                         </tr>
                     @endforelse
